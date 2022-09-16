@@ -1,0 +1,1151 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates" xmlns:ddic="http://www.sap.com/abapxml/types/dictionary" xmlns:def="http://www.sap.com/abapxml/types/defined">
+
+  <tt:root name="ROOT" type="ddic:J_3RF_DIXML_SCHFDOPPR"/>
+  <tt:variable name="DATE"/>
+  <tt:variable name="TIME"/>
+  <tt:variable name="TMP"/>
+  <tt:variable name="UTD_CAT"/>
+  <tt:variable name="DEF" val="C('-')" />
+  <tt:variable name="GOODS_ID"/>
+  <tt:template>
+    <!-- Файл -->
+    <Файл>
+      <tt:attribute name="ВерсФорм" value-ref=".ROOT.FILEFORMVER"/>
+      <tt:attribute name="ИдФайл" value-ref=".ROOT.FILENAME"/>
+
+      <tt:deserialize>
+        <tt:attribute name="ИдФайл">
+          <tt:read var="TMP"/>
+        </tt:attribute>
+        <tt:call-method class="J_3RF_TRANSF_01" d-name="GET_UTD_CAT">
+          <tt:with-parameter d-name="IV_FILENAME" var="TMP"/>
+          <tt:with-parameter d-name="EV_UTD_TYPE" var="UTD_CAT"/>
+        </tt:call-method>
+      </tt:deserialize>
+      <tt:serialize>
+        <tt:call-method class="J_3RF_TRANSF_01" s-name="GET_UTD_CAT_S">
+          <tt:with-parameter ref=".ROOT.FILENAME" s-name="IV_FILENAME"/>
+          <tt:with-parameter s-name="EV_UTD_TYPE" var="UTD_CAT"/>
+        </tt:call-method>
+      </tt:serialize>
+
+
+
+      <tt:cond s-check="not-initial(ref('ROOT.FILEPROGVAR'))">
+        <tt:cond d-check="exist(ref('ROOT.FILEPROGVAR'))">
+          <tt:attribute name="ВерсПрог" value-ref=".ROOT.FILEPROGVAR"/>
+        </tt:cond>
+      </tt:cond>
+      <!-- Файл/СвУчДокОбор -->
+      <СвУчДокОбор>
+        <tt:attribute name="ИдОтпр" value-ref=".ROOT.SELLER.ID"/>
+        <tt:attribute name="ИдПол" value-ref=".ROOT.BUYER.ID"/>
+        <tt:serialize>
+          <tt:cond check="not-initial(ref('ROOT.OPER_INN')) and not-initial(ref('ROOT.OPER_ID'))  and not-initial(ref('ROOT.OPER_NAME'))">
+            <СвОЭДОтпр>
+              <tt:attribute name="ИННЮЛ" value-ref=".ROOT.OPER_INN"/>
+              <tt:attribute name="ИдЭДО" value-ref=".ROOT.OPER_ID"/>
+              <tt:attribute name="НаимОрг" value-ref=".ROOT.OPER_NAME"/>
+            </СвОЭДОтпр>
+          </tt:cond>
+        </tt:serialize>
+        <tt:deserialize>
+          <tt:cond>
+            <СвОЭДОтпр>
+              <tt:attribute name="ИННЮЛ" value-ref=".ROOT.OPER_INN"/>
+              <tt:attribute name="ИдЭДО" value-ref=".ROOT.OPER_ID"/>
+              <tt:attribute name="НаимОрг" value-ref=".ROOT.OPER_NAME"/>
+            </СвОЭДОтпр>
+          </tt:cond>
+        </tt:deserialize>
+      </СвУчДокОбор>
+
+      <!-- Файл/Документ -->
+      <Документ>
+        <tt:attribute name="КНД" value-ref=".ROOT.KND"/>
+
+        <tt:serialize>
+          <tt:call-method class="J_3RF_TRANSF_01" s-name="ITIME_TO_ETIME">
+            <tt:with-parameter ref=".ROOT.TIME_DOC" s-name="TIME_IF"/>
+            <tt:with-parameter s-name="TIME_EF" var="TIME"/>
+          </tt:call-method>
+          <tt:attribute name="ВремИнфПр">
+            <tt:write var="TIME"/>
+          </tt:attribute>
+        </tt:serialize>
+        <tt:deserialize>
+          <tt:attribute name="ВремИнфПр">
+            <tt:read var="TIME"/>
+          </tt:attribute>
+          <tt:call-method class="J_3RF_TRANSF_01" d-name="ETIME_TO_ITIME">
+            <tt:with-parameter d-name="TIME_EF" var="TIME"/>
+            <tt:with-parameter d-name="TIME_IF" ref=".ROOT.TIME_DOC"/>
+          </tt:call-method>
+        </tt:deserialize>
+
+        <tt:serialize>
+          <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+            <tt:with-parameter ref=".ROOT.DATE_DOC" s-name="DATE_IF"/>
+            <tt:with-parameter s-name="DATE_EF" var="DATE"/>
+          </tt:call-method>
+          <tt:attribute name="ДатаИнфПр">
+            <tt:write var="DATE"/>
+          </tt:attribute>
+        </tt:serialize>
+        <tt:deserialize>
+          <tt:attribute name="ДатаИнфПр">
+            <tt:read var="DATE"/>
+          </tt:attribute>
+          <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+            <tt:with-parameter d-name="DATE_EF" var="DATE"/>
+            <tt:with-parameter d-name="DATE_IF" ref=".ROOT.DATE_DOC"/>
+          </tt:call-method>
+        </tt:deserialize>
+
+        <tt:call transformation="J_3RF_SUBTR_UTD_DOC_ORIG_NAME">
+          <tt:with-root name="ROOT" ref="ROOT"/>
+        </tt:call>
+
+        <tt:attribute name="НаимЭконСубСост" value-ref=".ROOT.DOC_CREATOR_NAME"/>
+
+        <tt:cond s-check="not-initial(ref('ROOT.DOC_CREATOR_AUTH_BASIS'))">
+          <tt:cond d-check="exist(ref('ROOT.DOC_CREATOR_AUTH_BASIS'))">
+            <tt:attribute name="ОснДоверОргСост" value-ref=".ROOT.DOC_CREATOR_AUTH_BASIS"/>
+          </tt:cond>
+        </tt:cond>
+
+        <tt:cond s-check="not-initial(ref('ROOT.ADDFLDS_STRUCT_INFO'))">
+          <tt:cond d-check="exist(ref('ROOT.ADDFLDS_STRUCT_INFO'))">
+            <tt:attribute name="СоглСтрДопИнф" value-ref=".ROOT.ADDFLDS_STRUCT_INFO"/>
+          </tt:cond>
+        </tt:cond>
+
+        <tt:call transformation="J_3RF_SUBTR_UTD_DOC_NAME">
+          <tt:with-root name="ROOT" ref="ROOT"/>
+        </tt:call>
+
+        <tt:call transformation="J_3RF_SUBTR_UTD_FUNCTION">
+          <tt:with-root name="ROOT" ref="ROOT"/>
+          <tt:with-parameter name="FUNCTION_PR" val="''"/>
+          <tt:with-parameter name="UTD_CAT" var="UTD_CAT"/>
+        </tt:call>
+        <!-- Файл/Документ/СвСчФакт -->
+        <СвСчФакт>
+          <tt:call transformation="J_3RF_SUBTR_SVSCHFAKT_02">
+            <tt:with-root name="ROOT" ref="ROOT"/>
+          </tt:call>
+          <!-- Файл/Документ/СвСчФакт/ГрузОт -->
+          <tt:serialize>
+            <tt:switch>
+              <tt:cond check="ref('ROOT.SELLER_SHIPS')='I'">
+              </tt:cond>
+              <tt:cond check="ref('ROOT.SELLER_SHIPS')='X'">
+                <ГрузОт>
+                  <ОнЖе>он же</ОнЖе>
+                </ГрузОт>
+              </tt:cond>
+              <tt:cond check="not(ref('ROOT.SELLER_SHIPS')='X')">
+                <ГрузОт>
+                  <ГрузОтпр>
+                    <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+                      <tt:with-root name="ROOT" ref="ROOT.SHIPPER"/>
+                    </tt:call>
+                  </ГрузОтпр>
+                </ГрузОт>
+              </tt:cond>
+            </tt:switch>
+          </tt:serialize>
+          <tt:deserialize>
+            <tt:cond>
+              <ГрузОт>
+                <tt:cond>
+                  <ОнЖе>он же</ОнЖе>
+                  <tt:assign to-ref="ROOT.SELLER_SHIPS" val="'X'"/>
+                </tt:cond>
+                <tt:cond>
+                  <ГрузОтпр>
+                    <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+                      <tt:with-root name="ROOT" ref="ROOT.SHIPPER"/>
+                    </tt:call>
+                  </ГрузОтпр>
+                </tt:cond>
+              </ГрузОт>
+            </tt:cond>
+          </tt:deserialize>
+
+          <!-- Файл/Документ/СвСчФакт/ГрузПолуч -->
+          <tt:serialize>
+            <tt:cond check="not-initial(ref('ROOT.CONSIGNEE'))">
+              <ГрузПолуч>
+                <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+                  <tt:with-root name="ROOT" ref="ROOT.CONSIGNEE"/>
+                </tt:call>
+              </ГрузПолуч>
+            </tt:cond>
+          </tt:serialize>
+          <tt:deserialize>
+            <tt:cond>
+              <ГрузПолуч>
+                <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+                  <tt:with-root name="ROOT" ref="ROOT.CONSIGNEE"/>
+                </tt:call>
+              </ГрузПолуч>
+            </tt:cond>
+          </tt:deserialize>
+
+          <tt:loop name="PAYPOS" ref="ROOT.PAYMENTS">
+            <СвПРД>
+              <tt:attribute name="НомерПРД">
+                <tt:value ref="$PAYPOS.PAY_EXT"/>
+              </tt:attribute>
+              <tt:attribute name="ДатаПРД">
+                <tt:value ref="$PAYPOS.PAY_DATE"/>
+              </tt:attribute>
+              <tt:serialize>
+                <tt:cond s-check="not-initial(ref('$PAYPOS.PAY_SUM'))">
+                  <tt:attribute name="СуммаПРД" value-ref="$PAYPOS.PAY_SUM"/>
+                </tt:cond>
+              </tt:serialize>
+              <tt:deserialize>
+                <tt:cond d-check="exist(ref('$PAYPOS.PAY_SUM'))">
+                  <tt:attribute name="СуммаПРД" value-ref="$PAYPOS.PAY_SUM"/>
+                </tt:cond>
+              </tt:deserialize>
+            </СвПРД>
+          </tt:loop>
+
+          <СвПокуп>
+            <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+              <tt:with-root name="ROOT" ref="ROOT.BUYER"/>
+            </tt:call>
+          </СвПокуп>
+
+          <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1 -->
+          <tt:serialize>
+            <tt:cond check="not-initial(ref('ROOT.GOV_CONTR_ID')) or not-initial(ref('ROOT.CURR_NAME')) or not-initial(ref('ROOT.CURR_RATE'))">
+              <ДопСвФХЖ1>
+                <tt:cond s-check="not-initial(ref('ROOT.GOV_CONTR_ID'))">
+                  <tt:attribute name="ИдГосКон" value-ref=".ROOT.GOV_CONTR_ID"/>
+                </tt:cond>
+
+                <tt:cond s-check="not-initial(ref('ROOT.CURR_NAME'))">
+                  <tt:attribute name="НаимОКВ" value-ref=".ROOT.CURR_NAME"/>
+                </tt:cond>
+
+                <tt:cond s-check="not-initial(ref('ROOT.CURR_RATE'))">
+                  <tt:attribute name="КурсВал" value-ref=".ROOT.CURR_RATE"/>
+                </tt:cond>
+
+                <tt:cond s-check="not-initial(ref('ROOT.INVOICE_CRT_DETAILS'))">
+                  <tt:attribute name="ОбстФормСЧФ" value-ref=".ROOT.INVOICE_CRT_DETAILS"/>
+                </tt:cond>
+
+                <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1/ИнфПродГосЗакКазн-->
+                <tt:cond check="not-initial(ref('ROOT.GOS_CONTR_SELLER_INFO'))">
+                  <tt:loop name="GOS_CONTR" ref="ROOT.GOS_CONTR_SELLER_INFO">
+                    <ИнфПродГосЗакКазн>
+                      <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+                        <tt:with-parameter ref="$GOS_CONTR.GOS_CONTR_DATE" s-name="DATE_IF"/>
+                        <tt:with-parameter s-name="DATE_EF" var="DATE"/>
+                      </tt:call-method>
+                      <tt:attribute name="ДатаГосКонт">
+                        <tt:write var="DATE"/>
+                      </tt:attribute>
+                      <tt:attribute name="НомерГосКонт">
+                        <tt:value ref="$GOS_CONTR.GOS_CONTR_NUM"/>
+                      </tt:attribute>
+                      <tt:cond s-check="not-initial(ref('$GOS_CONTR.SELLER_ACCOUNT_NUM'))">
+                        <tt:attribute name="ЛицСчетПрод" value-ref="$GOS_CONTR.SELLER_ACCOUNT_NUM"/>
+                      </tt:cond>
+                      <tt:cond s-check="not-initial(ref('$GOS_CONTR.BUDGET_CLASSF_CODE'))">
+                        <tt:attribute name="КодПродБюджКласс" value-ref="$GOS_CONTR.BUDGET_CLASSF_CODE"/>
+                      </tt:cond>
+                      <tt:cond s-check="not-initial(ref('$GOS_CONTR.SELLER_TARGET_CODE'))">
+                        <tt:attribute name="КодЦелиПрод" value-ref="$GOS_CONTR.SELLER_TARGET_CODE"/>
+                      </tt:cond>
+                      <tt:cond s-check="not-initial(ref('$GOS_CONTR.SELLER_TREASURY_CODE'))">
+                        <tt:attribute name="КодКазначПрод" value-ref="$GOS_CONTR.SELLER_TREASURY_CODE"/>
+                      </tt:cond>
+                      <tt:cond s-check="not-initial(ref('$GOS_CONTR.SELLER_TREASURY_NAME'))">
+                        <tt:attribute name="НаимКазначПрод" value-ref="$GOS_CONTR.SELLER_TREASURY_NAME"/>
+                      </tt:cond>
+                    </ИнфПродГосЗакКазн>
+                  </tt:loop>
+                </tt:cond>
+
+                <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1/СвФактор-->
+                <tt:cond check="not-initial(ref('ROOT.FACTOR'))">
+                  <СвФактор>
+                    <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+                      <tt:with-root name="ROOT" ref="ROOT.FACTOR"/>
+                    </tt:call>
+                  </СвФактор>
+                </tt:cond>
+
+                <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1/ОснУстДенТреб-->
+                <tt:cond check="not-initial(ref('ROOT.CLAIM_CONCESSION_REASON'))">
+                  <tt:loop name="LINE" ref="ROOT.CLAIM_CONCESSION_REASON">
+                    <ОснУстДенТреб>
+                      <tt:attribute name="НаимОсн">
+                        <tt:value ref="$LINE.DOC_NAME"/>
+                      </tt:attribute>
+                      <tt:cond s-check="not-initial(ref('$LINE.DOC_NUM'))">
+                        <tt:attribute name="НомОсн">
+                          <tt:value ref="$LINE.DOC_NUM"/>
+                        </tt:attribute>
+                      </tt:cond>
+
+                      <tt:cond s-check="not-initial(ref('$LINE.DOC_DATE'))">
+                        <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+                          <tt:with-parameter ref="$LINE.DOC_DATE" s-name="DATE_IF"/>
+                          <tt:with-parameter s-name="DATE_EF" var="DATE"/>
+                        </tt:call-method>
+                        <tt:attribute name="ДатаОсн">
+                          <tt:write var="DATE"/>
+                        </tt:attribute>
+                      </tt:cond>
+
+                      <tt:cond s-check="not-initial(ref('$LINE.EXTRA_INFO'))">
+                        <tt:attribute name="ДопСвОсн">
+                          <tt:value ref="$LINE.EXTRA_INFO"/>
+                        </tt:attribute>
+                      </tt:cond>
+
+                      <tt:cond s-check="not-initial(ref('$LINE.DOC_ID'))">
+                        <tt:attribute name="ИдентОсн">
+                          <tt:value ref="$LINE.DOC_ID"/>
+                        </tt:attribute>
+                      </tt:cond>
+                    </ОснУстДенТреб>
+                  </tt:loop>
+                </tt:cond>
+              </ДопСвФХЖ1>
+            </tt:cond>
+          </tt:serialize>
+          <tt:deserialize>
+            <tt:cond>
+              <ДопСвФХЖ1>
+                <tt:cond d-check="exist(ref('ROOT.GOV_CONTR_ID'))">
+                  <tt:attribute name="ИдГосКон" value-ref=".ROOT.GOV_CONTR_ID"/>
+                </tt:cond>
+
+                <tt:cond d-check="exist(ref('ROOT.CURR_NAME'))">
+                  <tt:attribute name="НаимОКВ" value-ref=".ROOT.CURR_NAME"/>
+                </tt:cond>
+
+                <tt:cond d-check="exist(ref('ROOT.CURR_RATE'))">
+                  <tt:attribute name="КурсВал" value-ref=".ROOT.CURR_RATE"/>
+                </tt:cond>
+
+                <tt:cond d-check="exist(ref('ROOT.INVOICE_CRT_DETAILS'))">
+                  <tt:attribute name="ОбстФормСЧФ" value-ref=".ROOT.INVOICE_CRT_DETAILS"/>
+                </tt:cond>
+
+                <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1/ИнфПродГосЗакКазн-->
+                <tt:cond check="exist(ref('ROOT.GOS_CONTR_SELLER_INFO'))">
+                  <tt:loop name="GOS_CONTR" ref="ROOT.GOS_CONTR_SELLER_INFO">
+                    <ИнфПродГосЗакКазн>
+                      <tt:attribute name="ДатаГосКонт">
+                        <tt:read var="DATE"/>
+                      </tt:attribute>
+                      <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+                        <tt:with-parameter d-name="DATE_EF" var="DATE"/>
+                        <tt:with-parameter d-name="DATE_IF" ref="$GOS_CONTR.GOS_CONTR_DATE"/>
+                      </tt:call-method>
+                      <tt:attribute name="НомерГосКонт">
+                        <tt:value ref="$GOS_CONTR.GOS_CONTR_NUM"/>
+                      </tt:attribute>
+                      <tt:cond d-check="exist(ref('$GOS_CONTR.SELLER_ACCOUNT_NUM'))">
+                        <tt:attribute name="ЛицСчетПрод" value-ref="$GOS_CONTR.SELLER_ACCOUNT_NUM"/>
+                      </tt:cond>
+                      <tt:cond d-check="exist(ref('$GOS_CONTR.BUDGET_CLASSF_CODE'))">
+                        <tt:attribute name="КодПродБюджКласс" value-ref="$GOS_CONTR.BUDGET_CLASSF_CODE"/>
+                      </tt:cond>
+                      <tt:cond d-check="exist(ref('$GOS_CONTR.SELLER_TARGET_CODE'))">
+                        <tt:attribute name="КодЦелиПрод" value-ref="$GOS_CONTR.SELLER_TARGET_CODE"/>
+                      </tt:cond>
+                      <tt:cond d-check="exist(ref('$GOS_CONTR.SELLER_TREASURY_CODE'))">
+                        <tt:attribute name="КодКазначПрод" value-ref="$GOS_CONTR.SELLER_TREASURY_CODE"/>
+                      </tt:cond>
+                      <tt:cond d-check="exist(ref('$GOS_CONTR.SELLER_TREASURY_NAME'))">
+                        <tt:attribute name="НаимКазначПрод" value-ref="$GOS_CONTR.SELLER_TREASURY_NAME"/>
+                      </tt:cond>
+                    </ИнфПродГосЗакКазн>
+                  </tt:loop>
+                </tt:cond>
+
+                <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1/СвФактор-->
+                <tt:cond check="exist(ref('ROOT.FACTOR'))">
+                  <СвФактор>
+                    <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+                      <tt:with-root name="ROOT" ref="ROOT.FACTOR"/>
+                    </tt:call>
+                  </СвФактор>
+                </tt:cond>
+
+                <!-- Файл/Документ/СвСчФакт/ДопСвФХЖ1/ОснУстДенТреб-->
+                <tt:cond check="exist(ref('ROOT.CLAIM_CONCESSION_REASON'))">
+                  <tt:loop name="LINE" ref="ROOT.CLAIM_CONCESSION_REASON">
+                    <ОснУстДенТреб>
+                      <tt:attribute name="НаимОсн">
+                        <tt:value ref="$LINE.DOC_NAME"/>
+                      </tt:attribute>
+                      <tt:cond d-check="exist(ref('$LINE.DOC_NUM'))">
+                        <tt:attribute name="НомОсн">
+                          <tt:value ref="$LINE.DOC_NUM"/>
+                        </tt:attribute>
+                      </tt:cond>
+
+                      <tt:cond d-check="exist(ref('$LINE.DOC_DATE'))">
+                        <tt:attribute name="ДатаОсн">
+                          <tt:read var="DATE"/>
+                        </tt:attribute>
+                        <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+                          <tt:with-parameter d-name="DATE_EF" var="DATE"/>
+                          <tt:with-parameter d-name="DATE_IF" ref="$LINE.DOC_DATE"/>
+                        </tt:call-method>
+                      </tt:cond>
+
+                      <tt:cond d-check="exist(ref('$LINE.EXTRA_INFO'))">
+                        <tt:attribute name="ДопСвОсн">
+                          <tt:value ref="$LINE.EXTRA_INFO"/>
+                        </tt:attribute>
+                      </tt:cond>
+
+                      <tt:cond d-check="exist(ref('$LINE.DOC_ID'))">
+                        <tt:attribute name="ИдентОсн">
+                          <tt:value ref="$LINE.DOC_ID"/>
+                        </tt:attribute>
+                      </tt:cond>
+                    </ОснУстДенТреб>
+                  </tt:loop>
+                </tt:cond>
+              </ДопСвФХЖ1>
+            </tt:cond>
+          </tt:deserialize>
+
+          <!-- Файл/Документ/СвСчФакт/ДокПодтвОтгр-->
+          <tt:serialize>
+            <tt:cond check="not-initial(ref('ROOT.SHIPMENT_DOC'))">
+              <tt:loop name="SHIP_DOC" ref="ROOT.SHIPMENT_DOC">
+                <ДокПодтвОтгр>
+                  <tt:attribute name="НаимДокОтгр">
+                    <tt:value ref="$SHIP_DOC.SHPMNT_DOC_NAME"/>
+                  </tt:attribute>
+                  <tt:attribute name="НомДокОтгр">
+                    <tt:value ref="$SHIP_DOC.SHPMNT_DOC_NUM"/>
+                  </tt:attribute>
+                  <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+                    <tt:with-parameter ref="$SHIP_DOC.SHPMNT_DOC_DATE" s-name="DATE_IF"/>
+                    <tt:with-parameter s-name="DATE_EF" var="DATE"/>
+                  </tt:call-method>
+                  <tt:attribute name="ДатаДокОтгр">
+                    <tt:write var="DATE"/>
+                  </tt:attribute>
+                </ДокПодтвОтгр>
+              </tt:loop>
+            </tt:cond>
+          </tt:serialize>
+          <tt:deserialize>
+            <tt:cond check="exist(ref('ROOT.SHIPMENT_DOC'))">
+              <tt:loop name="SHIP_DOC" ref="ROOT.SHIPMENT_DOC">
+                <ДокПодтвОтгр>
+                  <tt:attribute name="НаимДокОтгр">
+                    <tt:value ref="$SHIP_DOC.SHPMNT_DOC_NAME"/>
+                  </tt:attribute>
+                  <tt:attribute name="НомДокОтгр">
+                    <tt:value ref="$SHIP_DOC.SHPMNT_DOC_NUM"/>
+                  </tt:attribute>
+                  <tt:cond d-check="exist(ref('$SHIP_DOC.SHPMNT_DOC_DATE'))">
+                    <tt:attribute name="ДатаДокОтгр">
+                      <tt:read var="DATE"/>
+                    </tt:attribute>
+                    <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+                      <tt:with-parameter d-name="DATE_EF" var="DATE"/>
+                      <tt:with-parameter d-name="DATE_IF" ref="$SHIP_DOC.SHPMNT_DOC_DATE"/>
+                    </tt:call-method>
+                  </tt:cond>
+                </ДокПодтвОтгр>
+              </tt:loop>
+            </tt:cond>
+          </tt:deserialize>
+
+          <!-- Файл/Документ/СвСчФакт/ИнфПолФХЖ1 -->
+          <tt:serialize>
+            <tt:cond check="not-initial(ref('ROOT.INFO_FILE_ID')) or not-initial(ref('ROOT.INFO_TEXT'))">
+              <ИнфПолФХЖ1>
+                <tt:cond s-check="not-initial(ref('ROOT.INFO_FILE_ID'))">
+                  <tt:attribute name="ИдФайлИнфПол" value-ref=".ROOT.INFO_FILE_ID"/>
+                </tt:cond>
+
+                <tt:loop name="LINE" ref="ROOT.INFO_TEXT">
+                  <ТекстИнф>
+                    <tt:attribute name="Значен">
+                      <tt:value ref="$LINE.INFOTEXT"/>
+                    </tt:attribute>
+                    <tt:attribute name="Идентиф">
+                      <tt:value ref="$LINE.INFOID"/>
+                    </tt:attribute>
+                  </ТекстИнф>
+                </tt:loop>
+
+              </ИнфПолФХЖ1>
+            </tt:cond>
+          </tt:serialize>
+          <tt:deserialize>
+            <tt:cond>
+              <ИнфПолФХЖ1>
+                <tt:call transformation="J_3RF_SUBTR_UTD_TEXT_INFO">
+                  <tt:with-root name="ROOT" ref="ROOT"/>
+                </tt:call>
+              </ИнфПолФХЖ1>
+            </tt:cond>
+          </tt:deserialize>
+        </СвСчФакт>
+
+        <!-- Файл/Документ/ТаблСчФакт -->
+        <tt:serialize>
+          <tt:cond check="not-initial(ref('ROOT.ITEMS'))">
+            <ТаблСчФакт>
+              <tt:loop name="ITEM" ref="ROOT.ITEMS">
+                <СведТов>
+                  <tt:attribute name="НомСтр">
+                    <tt:value ref="$ITEM.POSNR"/>
+                  </tt:attribute>
+                  <tt:attribute name="НаимТов">
+                    <tt:value ref="$ITEM.GOODS"/>
+                  </tt:attribute>
+                  <tt:cond s-check="not-initial(ref('$ITEM.TOTAL'))">
+                    <tt:attribute name="СтТовУчНал" value-ref="$ITEM.TOTAL"/>
+                  </tt:cond>
+                  <tt:cond s-check="initial(ref('$ITEM.TOTAL'))  and
+                                    ( ref('.ROOT.SRC_TYPE') = N('10') or
+                                      ref('.ROOT.SRC_TYPE') = N('11') or
+                                      ref('.ROOT.SRC_TYPE') = N('13') or
+                                      ref('.ROOT.SRC_TYPE') = N('14') or
+                                      ref('.ROOT.SRC_TYPE') = N('16') or
+                                      ref('.ROOT.SRC_TYPE') = N('17') )">
+                    <tt:attribute name="ДефСтТовУчНал"> <tt:write var="DEF"/> </tt:attribute>
+                  </tt:cond>
+                  <tt:attribute name="НалСт">
+                    <tt:call transformation="J_3RF_SUBTR_NALST_01_2015">
+                      <tt:with-root name="ROOT" ref="$ITEM"/>
+                    </tt:call>
+                  </tt:attribute>
+
+                  <tt:cond s-check="not-initial(ref('$ITEM.OKEI'))">
+                    <tt:attribute name="ОКЕИ_Тов" value-ref="$ITEM.OKEI"/>
+                  </tt:cond>
+
+                  <tt:cond s-check="initial(ref('$ITEM.OKEI'))  and ref('.ROOT.SRC_TYPE') &gt;= N('10') and ref('.ROOT.SRC_TYPE') &lt;= N('18')">
+                    <tt:attribute name="ДефОКЕИ_Тов"> <tt:write var="DEF"/> </tt:attribute>
+                  </tt:cond>
+
+                  <tt:cond s-check="not-initial(ref('$ITEM.QUANT'))">
+                    <tt:attribute name="КолТов" value-ref="$ITEM.QUANT"/>
+                  </tt:cond>
+
+                  <tt:cond s-check="initial(ref('$ITEM.QUANT')) and ref('.ROOT.SRC_TYPE') &gt;= N('10') and ref('.ROOT.SRC_TYPE') &lt;= N('18')">
+                    <tt:attribute name="КолТов" value-ref="$ITEM.QUANT" option="decimals(0)"/>
+                  </tt:cond>
+
+                  <tt:cond s-check="not-initial(ref('$ITEM.PRICE')) and initial(ref('$ITEM.PRICE_TXT'))">
+                    <tt:attribute name="ЦенаТов" value-ref="$ITEM.PRICE"/>
+                  </tt:cond>
+
+                  <tt:cond s-check="initial(ref('$ITEM.PRICE')) and ref('.ROOT.SRC_TYPE') &gt;= N('10') and ref('.ROOT.SRC_TYPE') &lt;= N('18')">
+                    <tt:attribute name="ЦенаТов" value-ref="$ITEM.PRICE" option="decimals(0)"/>
+                  </tt:cond>
+
+                  <tt:cond s-check="not-initial(ref('$ITEM.PRICE_TXT'))">
+                    <tt:attribute name="ЦенаТов" value-ref="$ITEM.PRICE_TXT"/>
+                  </tt:cond>
+
+                  <tt:cond s-check="not-initial(ref('$ITEM.SMNET'))">
+                    <tt:attribute name="СтТовБезНДС" value-ref="$ITEM.SMNET"/>
+                  </tt:cond>
+
+                  <Акциз>
+                    <tt:call transformation="J_3RF_SUBTR_EXCISE_01_2015">
+                      <tt:with-root name="ROOT" ref="$ITEM.Excise"/>
+                    </tt:call>
+                  </Акциз>
+
+                  <СумНал>
+                    <tt:call transformation="J_3RF_SUBTR_SUMNDS_UTD">
+                      <tt:with-root name="ROOT" ref="$ITEM.SMVAT"/>
+                    </tt:call>
+                  </СумНал>
+
+                  <!--                  <tt:cond-var check="UTD_CAT!='2'">-->
+                  <tt:loop name="CCD_TAB" ref="$ITEM.CCD_TAB">
+                    <СвТД>
+                      <tt:attribute name="КодПроисх">
+                        <tt:value ref="$CCD_TAB.HERKL"/>
+                      </tt:attribute>
+                      <tt:attribute name="НомерТД">
+                        <tt:value ref="$CCD_TAB.CCD_NUM"/>
+                      </tt:attribute>
+                    </СвТД>
+                  </tt:loop>
+                  <!--                  </tt:cond-var>-->
+
+                  <tt:switch-var>
+                    <tt:cond-var check="UTD_CAT=''">
+                      <tt:loop name="NOTES_TAB" ref="$ITEM.NOTES_TAB">
+                        <ИнфПолФХЖ2>
+                          <tt:attribute name="Значен">
+                            <tt:value ref="$NOTES_TAB.NOTE_TEXT"/>
+                          </tt:attribute>
+                          <tt:attribute name="Идентиф">
+                            <tt:value ref="$NOTES_TAB.NOTE_ID"/>
+                          </tt:attribute>
+                        </ИнфПолФХЖ2>
+                      </tt:loop>
+
+                      <tt:cond check=
+                                       "not-initial(ref('$ITEM.GOOD_TYPE')) or
+                       not-initial(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
+                       not-initial(ref('$ITEM.GOOD_FEATURE')) or
+                       not-initial(ref('$ITEM.MEASURE_NAME')) or
+                       not-initial(ref('$ITEM.COUNTRY_ORIGIN')) or
+                       not-initial(ref('$ITEM.TRANS_AMOUNT')) or
+                       not-initial(ref('$ITEM.CORR_ACCT_DEBIT')) or
+                       not-initial(ref('$ITEM.CORR_ACCT_CREDIT')) or
+                       not-initial(ref('$ITEM.GOODS_CHARACTERISTICS')) or
+                       not-initial(ref('$ITEM.GOODS_SORT')) or
+                       not-initial(ref('$ITEM.VENDOR_GOODS_CODE')) or
+                       not-initial(ref('$ITEM.CATALOG_CODE')) or
+                       not-initial(ref('$ITEM.GOODS_TYPE_CODE'))">
+                        <ДопСведТов>
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOOD_TYPE'))">
+                            <tt:attribute name="ПрТовРаб" value-ref="$ITEM.GOOD_TYPE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOOD_TYPE_ADD_INF'))">
+                            <tt:attribute name="ДопПризн" value-ref="$ITEM.GOOD_TYPE_ADD_INF"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOOD_FEATURE'))">
+                            <tt:attribute name="КодТов" value-ref="$ITEM.GOOD_FEATURE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.MEASURE_NAME'))">
+                            <tt:attribute name="НаимЕдИзм" value-ref="$ITEM.MEASURE_NAME"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.COUNTRY_ORIGIN'))">
+                            <tt:attribute name="КрНаимСтрПр" value-ref="$ITEM.COUNTRY_ORIGIN"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.TRANS_AMOUNT'))">
+                            <tt:attribute name="НадлОтп" value-ref="$ITEM.TRANS_AMOUNT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.CORR_ACCT_DEBIT'))">
+                            <tt:attribute name="КорСчДебет" value-ref="$ITEM.CORR_ACCT_DEBIT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.CORR_ACCT_CREDIT'))">
+                            <tt:attribute name="КорСчКредит" value-ref="$ITEM.CORR_ACCT_CREDIT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOODS_CHARACTERISTICS'))">
+                            <tt:attribute name="ХарактерТов" value-ref="$ITEM.GOODS_CHARACTERISTICS"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOODS_SORT'))">
+                            <tt:attribute name="СортТов" value-ref="$ITEM.GOODS_SORT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.VENDOR_GOODS_CODE'))">
+                            <tt:attribute name="АртикулТов" value-ref="$ITEM.VENDOR_GOODS_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.CATALOG_CODE'))">
+                            <tt:attribute name="КодКат" value-ref="$ITEM.CATALOG_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOODS_TYPE_CODE'))">
+                            <tt:attribute name="КодВидТов" value-ref="$ITEM.GOODS_TYPE_CODE"/>
+                          </tt:cond>
+
+                        </ДопСведТов>
+                      </tt:cond>
+                    </tt:cond-var>
+                    <tt:cond-var>
+                      <tt:cond check=
+                                       "not-initial(ref('$ITEM.GOOD_TYPE')) or
+                       not-initial(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
+                       not-initial(ref('$ITEM.GOOD_FEATURE')) or
+                       not-initial(ref('$ITEM.MEASURE_NAME')) or
+                       not-initial(ref('$ITEM.COUNTRY_ORIGIN')) or
+                       not-initial(ref('$ITEM.TRANS_AMOUNT')) or
+                       not-initial(ref('$ITEM.CORR_ACCT_DEBIT')) or
+                       not-initial(ref('$ITEM.CORR_ACCT_CREDIT')) or
+                       not-initial(ref('$ITEM.GOODS_CHARACTERISTICS')) or
+                       not-initial(ref('$ITEM.GOODS_SORT')) or
+                       not-initial(ref('$ITEM.VENDOR_GOODS_CODE')) or
+                       not-initial(ref('$ITEM.CATALOG_CODE')) or
+                       not-initial(ref('$ITEM.GOODS_TYPE_CODE')) or
+                       not-initial(ref('$ITEM.TRACEBILITY_INFO')) or
+                       not-initial(ref('$ITEM.GOODS_IDENTITY_NEW'))">
+                        <ДопСведТов>
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOOD_TYPE'))">
+                            <tt:attribute name="ПрТовРаб" value-ref="$ITEM.GOOD_TYPE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOOD_TYPE_ADD_INF'))">
+                            <tt:attribute name="ДопПризн" value-ref="$ITEM.GOOD_TYPE_ADD_INF"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOOD_FEATURE'))">
+                            <tt:attribute name="КодТов" value-ref="$ITEM.GOOD_FEATURE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.MEASURE_NAME'))">
+                            <tt:attribute name="НаимЕдИзм" value-ref="$ITEM.MEASURE_NAME"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.COUNTRY_ORIGIN'))">
+                            <tt:attribute name="КрНаимСтрПр" value-ref="$ITEM.COUNTRY_ORIGIN"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.TRANS_AMOUNT'))">
+                            <tt:attribute name="НадлОтп" value-ref="$ITEM.TRANS_AMOUNT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.CORR_ACCT_DEBIT'))">
+                            <tt:attribute name="КорСчДебет" value-ref="$ITEM.CORR_ACCT_DEBIT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.CORR_ACCT_CREDIT'))">
+                            <tt:attribute name="КорСчКредит" value-ref="$ITEM.CORR_ACCT_CREDIT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOODS_CHARACTERISTICS'))">
+                            <tt:attribute name="ХарактерТов" value-ref="$ITEM.GOODS_CHARACTERISTICS"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOODS_SORT'))">
+                            <tt:attribute name="СортТов" value-ref="$ITEM.GOODS_SORT"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.VENDOR_GOODS_CODE'))">
+                            <tt:attribute name="АртикулТов" value-ref="$ITEM.VENDOR_GOODS_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.CATALOG_CODE'))">
+                            <tt:attribute name="КодКат" value-ref="$ITEM.CATALOG_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond s-check="not-initial(ref('$ITEM.GOODS_TYPE_CODE'))">
+                            <tt:attribute name="КодВидТов" value-ref="$ITEM.GOODS_TYPE_CODE"/>
+                          </tt:cond>
+
+                          <!--                       Файл/Документ/ТаблСчФакт/ДопСведТов/СведПрослеж -->
+                          <tt:cond check="not-initial(ref('$ITEM.TRACEBILITY_INFO'))">
+                            <tt:loop name="INFO" ref="$ITEM.TRACEBILITY_INFO">
+                              <СведПрослеж>
+                                <tt:attribute name="НомТовПрослеж">
+                                  <tt:value ref="$INFO.GOODS_BATCH_REG_NUM"/>
+                                </tt:attribute>
+                                <tt:attribute name="ЕдИзмПрослеж">
+                                  <tt:value ref="$INFO.OKEI"/>
+                                </tt:attribute>
+                                <tt:attribute name="НаимЕдИзмПрослеж">
+                                  <tt:value ref="$INFO.OKEI_NAME"/>
+                                </tt:attribute>
+                                <tt:attribute name="КолВЕдПрослеж">
+                                  <tt:value ref="$INFO.QUANTITY"/>
+                                </tt:attribute>
+                                <tt:cond s-check="not-initial(ref('$INFO.ADDIT_INDICATOR'))">
+                                  <tt:attribute name="ДопПрослеж" value-ref="$INFO.ADDIT_INDICATOR"/>
+                                </tt:cond>
+                              </СведПрослеж>
+                            </tt:loop>
+                          </tt:cond>
+
+                          <!--                       Файл/Документ/ТаблСчФакт/ДопСведТов/НомСредИдентТов -->
+                          <!--                          <tt:cond check="not-initial(ref('$ITEM.GOODS_IDENTITY'))">
+                                                      <НомСредИдентТов>
+                                                        <tt:loop name="GOODS" ref="$ITEM.GOODS_IDENTITY">
+                                                          <tt:cond s-check="not-initial(ref('$GOODS.PACKAGE_ID'))">
+                                                            <tt:attribute name="ИдентТрансУпак" value-ref="$GOODS.PACKAGE_ID"/>
+                                                          </tt:cond>
+                                                          <tt:cond s-check="not-initial(ref('$GOODS.CONTROL_ID_MARK'))">
+                                                            <tt:assign ref="$GOODS.CONTROL_ID_MARK" to-var="TMP"/>
+                                                            <КИЗ>
+                                                              <tt:write var="TMP"/>
+                                                            </КИЗ>
+                                                          </tt:cond>
+                                                          <tt:cond s-check="not-initial(ref('$GOODS.SEC_PACKAGE_ID'))">
+                                                            <tt:assign ref="$GOODS.SEC_PACKAGE_ID" to-var="TMP"/>
+                                                            <НомУпак>
+                                                              <tt:write var="TMP"/>
+                                                            </НомУпак>
+                                                          </tt:cond>
+                                                        </tt:loop>
+                                                      </НомСредИдентТов>
+                                                    </tt:cond>-->
+
+                          <tt:cond check="not-initial(ref('$ITEM.GOODS_IDENTITY_NEW'))">
+                            <tt:loop name="GOODS" ref="$ITEM.GOODS_IDENTITY_NEW">
+                              <НомСредИдентТов>
+                                <tt:cond s-check="not-initial(ref('$GOODS.PACKAGE_ID'))">
+                                  <tt:attribute name="ИдентТрансУпак" value-ref="$GOODS.PACKAGE_ID"/>
+                                </tt:cond>
+                                <tt:cond s-check="not-initial(ref('$GOODS.CONTROL_ID_MARK'))">
+                                  <tt:loop name="GOODS_ID" ref="$GOODS.CONTROL_ID_MARK">
+                                    <tt:assign ref="$GOODS_ID.CONTROL_ID_MARK" to-var="TMP"/>
+                                    <КИЗ>
+                                      <tt:write var="TMP"/>
+                                    </КИЗ>
+                                  </tt:loop>
+                                </tt:cond>
+                                <tt:cond s-check="not-initial(ref('$GOODS.SEC_PACKAGE_ID'))">
+                                  <tt:loop name="PACK_ID" ref="$GOODS.SEC_PACKAGE_ID">
+                                    <tt:assign ref="$PACK_ID.SEC_PACKAGE_ID" to-var="TMP"/>
+                                    <НомУпак>
+                                      <tt:write var="TMP"/>
+                                    </НомУпак>
+                                  </tt:loop>
+                                </tt:cond>
+                              </НомСредИдентТов>
+                            </tt:loop>
+                          </tt:cond>
+
+                        </ДопСведТов>
+                      </tt:cond>
+
+                      <tt:loop name="NOTES_TAB" ref="$ITEM.NOTES_TAB">
+                        <ИнфПолФХЖ2>
+                          <tt:attribute name="Значен">
+                            <tt:value ref="$NOTES_TAB.NOTE_TEXT"/>
+                          </tt:attribute>
+                          <tt:attribute name="Идентиф">
+                            <tt:value ref="$NOTES_TAB.NOTE_ID"/>
+                          </tt:attribute>
+                        </ИнфПолФХЖ2>
+                      </tt:loop>
+                    </tt:cond-var>
+                  </tt:switch-var>
+                </СведТов>
+              </tt:loop>
+
+              <tt:call transformation="J_3RF_SUBTR_VSEGOOPL_UTD">
+                <tt:with-root name="ROOT" ref="ROOT.TOTAL"/>
+                <tt:with-parameter name="UTD_CAT" var="UTD_CAT"/>
+              </tt:call>
+            </ТаблСчФакт>
+          </tt:cond>
+        </tt:serialize>
+        <tt:deserialize>
+          <tt:cond>
+            <ТаблСчФакт>
+              <tt:loop name="ITEM" ref="ROOT.ITEMS">
+                <СведТов>
+                  <tt:attribute name="НомСтр">
+                    <tt:value ref="$ITEM.POSNR"/>
+                  </tt:attribute>
+                  <tt:attribute name="НаимТов">
+                    <tt:value ref="$ITEM.GOODS"/>
+                  </tt:attribute>
+                  <tt:cond d-check="exist(ref('$ITEM.TOTAL'))">
+                    <tt:attribute name="СтТовУчНал" value-ref="$ITEM.TOTAL"/>
+                  </tt:cond>
+                  <tt:attribute name="НалСт">
+                    <tt:call transformation="J_3RF_SUBTR_NALST_01_2015">
+                      <tt:with-root name="ROOT" ref="$ITEM"/>
+                    </tt:call>
+                  </tt:attribute>
+
+                  <tt:cond d-check="exist(ref('$ITEM.OKEI'))">
+                    <tt:attribute name="ОКЕИ_Тов" value-ref="$ITEM.OKEI"/>
+                  </tt:cond>
+
+                  <tt:cond d-check="exist(ref('$ITEM.QUANT'))">
+                    <tt:attribute name="КолТов" value-ref="$ITEM.QUANT"/>
+                  </tt:cond>
+
+                  <tt:cond d-check="exist(ref('$ITEM.PRICE'))">
+                    <tt:attribute name="ЦенаТов" value-ref="$ITEM.PRICE"/>
+                  </tt:cond>
+
+                  <tt:cond d-check="exist(ref('$ITEM.SMNET'))">
+                    <tt:attribute name="СтТовБезНДС" value-ref="$ITEM.SMNET"/>
+                  </tt:cond>
+
+                  <Акциз>
+                    <tt:call transformation="J_3RF_SUBTR_EXCISE_01_2015">
+                      <tt:with-root name="ROOT" ref="$ITEM.Excise"/>
+                    </tt:call>
+                  </Акциз>
+
+                  <СумНал>
+                    <tt:call transformation="J_3RF_SUBTR_SUMNDS_UTD">
+                      <tt:with-root name="ROOT" ref="$ITEM.SMVAT"/>
+                    </tt:call>
+                  </СумНал>
+
+                  <!--                  <tt:cond-var check="UTD_CAT!='2'">-->
+                  <tt:loop name="CCD_TAB" ref="$ITEM.CCD_TAB">
+                    <СвТД>
+                      <tt:cond check="exist(ref('$CCD_TAB.HERKL'))">
+                        <tt:attribute name="КодПроисх">
+                          <tt:value ref="$CCD_TAB.HERKL"/>
+                        </tt:attribute>
+                      </tt:cond>
+                      <tt:cond check="exist(ref('$CCD_TAB.CCD_NUM'))">
+                        <tt:attribute name="НомерТД">
+                          <tt:value ref="$CCD_TAB.CCD_NUM"/>
+                        </tt:attribute>
+                      </tt:cond>
+                    </СвТД>
+                  </tt:loop>
+                  <!--                  </tt:cond-var>-->
+
+                  <tt:switch-var>
+                    <tt:cond-var check="UTD_CAT=''">
+                      <tt:loop name="NOTES_TAB" ref="$ITEM.NOTES_TAB">
+                        <ИнфПолФХЖ2>
+                          <tt:attribute name="Идентиф">
+                            <tt:value ref="$NOTES_TAB.NOTE_ID"/>
+                          </tt:attribute>
+                          <tt:attribute name="Значен">
+                            <tt:value ref="$NOTES_TAB.NOTE_TEXT"/>
+                          </tt:attribute>
+                        </ИнфПолФХЖ2>
+                      </tt:loop>
+
+                      <tt:cond check=
+                      "exist(ref('$ITEM.GOOD_TYPE')) or
+                       exist(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
+                       exist(ref('$ITEM.GOOD_FEATURE')) or
+                       exist(ref('$ITEM.MEASURE_NAME')) or
+                       exist(ref('$ITEM.COUNTRY_ORIGIN')) or
+                       exist(ref('$ITEM.TRANS_AMOUNT')) or
+                       exist(ref('$ITEM.CORR_ACCT_DEBIT')) or
+                       exist(ref('$ITEM.CORR_ACCT_CREDIT')) or
+                       exist(ref('$ITEM.GOODS_CHARACTERISTICS')) or
+                       exist(ref('$ITEM.GOODS_SORT')) or
+                       exist(ref('$ITEM.VENDOR_GOODS_CODE')) or
+                       exist(ref('$ITEM.CATALOG_CODE')) or
+                       exist(ref('$ITEM.GOODS_TYPE_CODE'))">
+                        <ДопСведТов>
+                          <tt:cond d-check="exist(ref('$ITEM.GOOD_TYPE'))">
+                            <tt:attribute name="ПрТовРаб" value-ref="$ITEM.GOOD_TYPE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOOD_TYPE_ADD_INF'))">
+                            <tt:attribute name="ДопПризн" value-ref="$ITEM.GOOD_TYPE_ADD_INF"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOOD_FEATURE'))">
+                            <tt:attribute name="КодТов" value-ref="$ITEM.GOOD_FEATURE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.MEASURE_NAME'))">
+                            <tt:attribute name="НаимЕдИзм" value-ref="$ITEM.MEASURE_NAME"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.COUNTRY_ORIGIN'))">
+                            <tt:attribute name="КрНаимСтрПр" value-ref="$ITEM.COUNTRY_ORIGIN"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.TRANS_AMOUNT'))">
+                            <tt:attribute name="НадлОтп" value-ref="$ITEM.TRANS_AMOUNT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.CORR_ACCT_DEBIT'))">
+                            <tt:attribute name="КорСчДебет" value-ref="$ITEM.CORR_ACCT_DEBIT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.CORR_ACCT_CREDIT'))">
+                            <tt:attribute name="КорСчКредит" value-ref="$ITEM.CORR_ACCT_CREDIT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOODS_CHARACTERISTICS'))">
+                            <tt:attribute name="ХарактерТов" value-ref="$ITEM.GOODS_CHARACTERISTICS"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOODS_SORT'))">
+                            <tt:attribute name="СортТов" value-ref="$ITEM.GOODS_SORT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.VENDOR_GOODS_CODE'))">
+                            <tt:attribute name="АртикулТов" value-ref="$ITEM.VENDOR_GOODS_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.CATALOG_CODE'))">
+                            <tt:attribute name="КодКат" value-ref="$ITEM.CATALOG_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOODS_TYPE_CODE'))">
+                            <tt:attribute name="КодВидТов" value-ref="$ITEM.GOODS_TYPE_CODE"/>
+                          </tt:cond>
+
+                        </ДопСведТов>
+                      </tt:cond>
+                    </tt:cond-var>
+                    <tt:cond-var>
+                      <tt:cond check=
+                                       "exist(ref('$ITEM.GOOD_TYPE')) or
+                       exist(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
+                       exist(ref('$ITEM.GOOD_FEATURE')) or
+                       exist(ref('$ITEM.MEASURE_NAME')) or
+                       exist(ref('$ITEM.COUNTRY_ORIGIN')) or
+                       exist(ref('$ITEM.TRANS_AMOUNT')) or
+                       exist(ref('$ITEM.CORR_ACCT_DEBIT')) or
+                       exist(ref('$ITEM.CORR_ACCT_CREDIT')) or
+                       exist(ref('$ITEM.GOODS_CHARACTERISTICS')) or
+                       exist(ref('$ITEM.GOODS_SORT')) or
+                       exist(ref('$ITEM.VENDOR_GOODS_CODE')) or
+                       exist(ref('$ITEM.CATALOG_CODE')) or
+                       exist(ref('$ITEM.GOODS_TYPE_CODE')) or
+                       exist(ref('$ITEM.TRACEBILITY_INFO')) or
+                       exist(ref('$ITEM.GOODS_IDENTITY_NEW'))">
+                        <ДопСведТов>
+                          <tt:cond d-check="exist(ref('$ITEM.GOOD_TYPE'))">
+                            <tt:attribute name="ПрТовРаб" value-ref="$ITEM.GOOD_TYPE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOOD_TYPE_ADD_INF'))">
+                            <tt:attribute name="ДопПризн" value-ref="$ITEM.GOOD_TYPE_ADD_INF"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOOD_FEATURE'))">
+                            <tt:attribute name="КодТов" value-ref="$ITEM.GOOD_FEATURE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.MEASURE_NAME'))">
+                            <tt:attribute name="НаимЕдИзм" value-ref="$ITEM.MEASURE_NAME"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.COUNTRY_ORIGIN'))">
+                            <tt:attribute name="КрНаимСтрПр" value-ref="$ITEM.COUNTRY_ORIGIN"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.TRANS_AMOUNT'))">
+                            <tt:attribute name="НадлОтп" value-ref="$ITEM.TRANS_AMOUNT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.CORR_ACCT_DEBIT'))">
+                            <tt:attribute name="КорСчДебет" value-ref="$ITEM.CORR_ACCT_DEBIT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.CORR_ACCT_CREDIT'))">
+                            <tt:attribute name="КорСчКредит" value-ref="$ITEM.CORR_ACCT_CREDIT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOODS_CHARACTERISTICS'))">
+                            <tt:attribute name="ХарактерТов" value-ref="$ITEM.GOODS_CHARACTERISTICS"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOODS_SORT'))">
+                            <tt:attribute name="СортТов" value-ref="$ITEM.GOODS_SORT"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.VENDOR_GOODS_CODE'))">
+                            <tt:attribute name="АртикулТов" value-ref="$ITEM.VENDOR_GOODS_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.CATALOG_CODE'))">
+                            <tt:attribute name="КодКат" value-ref="$ITEM.CATALOG_CODE"/>
+                          </tt:cond>
+
+                          <tt:cond d-check="exist(ref('$ITEM.GOODS_TYPE_CODE'))">
+                            <tt:attribute name="КодВидТов" value-ref="$ITEM.GOODS_TYPE_CODE"/>
+                          </tt:cond>
+
+                          <!-- Файл/Документ/ТаблСчФакт/ДопСведТов/СведПрослеж -->
+                          <tt:cond check="exist(ref('$ITEM.TRACEBILITY_INFO'))">
+                            <tt:loop name="INFO" ref="$ITEM.TRACEBILITY_INFO">
+                              <СведПрослеж>
+                                <tt:attribute name="НомТовПрослеж">
+                                  <tt:value ref="$INFO.GOODS_BATCH_REG_NUM"/>
+                                </tt:attribute>
+                                <tt:attribute name="ЕдИзмПрослеж">
+                                  <tt:value ref="$INFO.OKEI"/>
+                                </tt:attribute>
+                                <tt:attribute name="НаимЕдИзмПрослеж">
+                                  <tt:value ref="$INFO.OKEI_NAME"/>
+                                </tt:attribute>
+                                <tt:attribute name="КолВЕдПрослеж">
+                                  <tt:value ref="$INFO.QUANTITY"/>
+                                </tt:attribute>
+                                <tt:cond d-check="exist(ref('$INFO.ADDIT_INDICATOR'))">
+                                  <tt:attribute name="ДопПрослеж" value-ref="$INFO.ADDIT_INDICATOR"/>
+                                </tt:cond>
+                              </СведПрослеж>
+                            </tt:loop>
+                          </tt:cond>
+
+                          <!-- Файл/Документ/ТаблСчФакт/ДопСведТов/НомСредИдентТов -->
+                          <tt:cond check="exist(ref('$ITEM.GOODS_IDENTITY_NEW'))">
+                            <tt:loop name="GOODS" ref="$ITEM.GOODS_IDENTITY_NEW">
+                              <НомСредИдентТов>
+                                <tt:cond d-check="exist(ref('$GOODS.PACKAGE_ID'))">
+                                  <tt:attribute name="ИдентТрансУпак" value-ref="$GOODS.PACKAGE_ID"/>
+                                </tt:cond>
+                                <tt:cond d-check="exist(ref('$GOODS.CONTROL_ID_MARK'))">
+                                  <tt:loop name="GOODS_ID" ref="$GOODS.CONTROL_ID_MARK">
+                                    <КИЗ>
+                                      <tt:read var="TMP"/>
+                                      <tt:assign to-ref="$GOODS_ID.CONTROL_ID_MARK" var="TMP"/>
+                                    </КИЗ>
+                                  </tt:loop>
+                                </tt:cond>
+                                <tt:cond d-check="exist(ref('$GOODS.SEC_PACKAGE_ID'))">
+                                  <tt:loop name="PACK_ID" ref="$GOODS.SEC_PACKAGE_ID">
+                                    <НомУпак>
+                                      <tt:read var="TMP"/>
+                                      <tt:assign to-ref="$PACK_ID.SEC_PACKAGE_ID" var="TMP"/>
+                                    </НомУпак>
+                                  </tt:loop>
+                                </tt:cond>
+                              </НомСредИдентТов>
+                            </tt:loop>
+                          </tt:cond>
+                        </ДопСведТов>
+                      </tt:cond>
+
+                      <tt:loop name="NOTES_TAB" ref="$ITEM.NOTES_TAB">
+                        <ИнфПолФХЖ2>
+                          <tt:attribute name="Идентиф">
+                            <tt:value ref="$NOTES_TAB.NOTE_ID"/>
+                          </tt:attribute>
+                          <tt:attribute name="Значен">
+                            <tt:value ref="$NOTES_TAB.NOTE_TEXT"/>
+                          </tt:attribute>
+                        </ИнфПолФХЖ2>
+                      </tt:loop>
+                    </tt:cond-var>
+                  </tt:switch-var>
+
+                </СведТов>
+              </tt:loop>
+
+              <tt:call transformation="J_3RF_SUBTR_VSEGOOPL_UTD">
+                <tt:with-root name="ROOT" ref="ROOT.TOTAL"/>
+                <tt:with-parameter name="UTD_CAT" var="UTD_CAT"/>
+              </tt:call>
+            </ТаблСчФакт>
+          </tt:cond>
+        </tt:deserialize>
+
+        <!-- Файл/Документ/СвПродПер -->
+        <tt:call transformation="J_3RF_SUBTR_UTD_SHIPMENT">
+          <tt:with-root name="ROOT" ref="ROOT"/>
+        </tt:call>
+
+        <!-- Файл/Документ/Подписант -->
+        <tt:call transformation="J_3RF_SUBTR_PODPISANT_03">
+          <tt:with-root name="ROOT" ref="ROOT"/>
+        </tt:call>
+      </Документ>
+
+    </Файл>
+  </tt:template>
+</tt:transform>
