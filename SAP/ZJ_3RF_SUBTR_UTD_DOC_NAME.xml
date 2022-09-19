@@ -1,0 +1,47 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+	 <tt:root name="ROOT"/>
+	 <tt:variable name="TMP"/>
+
+	 <tt:template>
+
+			<tt:serialize>
+				 <tt:assign ref="ROOT.DOC_NAME" to-var="TMP"/>
+				 <tt:cond check="initial(ref('ROOT.DOC_NAME'))">
+						<tt:cond check="((ref('ROOT.SRC_TYPE')=N('6'))  or
+												 (ref('ROOT.SRC_TYPE')=N('7'))  or
+                         (ref('ROOT.SRC_TYPE')=N('11')) or
+                         (ref('ROOT.SRC_TYPE')=N('12')) or
+                         (ref('ROOT.SRC_TYPE')=N('14')) or
+                         (ref('ROOT.SRC_TYPE')=N('15')) or
+                         (ref('ROOT.SRC_TYPE')=N('17')) or
+                         (ref('ROOT.SRC_TYPE')=N('18')))">	<!-- БСВ: '6' не обрабатывалась,добавил: =N('6')  -->
+							 <tt:assign to-var="TMP" val="C('Документ об отгрузке товаров (выполнении работ), передаче имущественных прав (документ об оказании услуг)')"/>
+						</tt:cond>
+						<tt:cond check="((ref('ROOT.SRC_TYPE')=N('20')) or
+                         (ref('ROOT.SRC_TYPE')=N('21')) or
+                         (ref('ROOT.SRC_TYPE')=N('22')))">
+							 <tt:assign to-var="TMP" val="C('Документ, включающий в себя сведения о факте закупки комиссионером (агентом, действующим от собственного имени) товаров для комитента (принципала)')"/>
+						</tt:cond>
+						<tt:cond check="((ref('ROOT.SRC_TYPE')=N('23')) or
+                         (ref('ROOT.SRC_TYPE')=N('24')) or
+                         (ref('ROOT.SRC_TYPE')=N('25')))">
+							 <tt:assign to-var="TMP" val="C('Документ, включающий в себя сведения о факте реализации комиссионером (агентом, действующим от собственного имени) товаров комитента (принципала)')"/>
+						</tt:cond>
+				 </tt:cond>
+				 <tt:cond-var check="not-initial(TMP)">
+						<tt:attribute name="ПоФактХЖ">
+							 <tt:write var="TMP"/>
+						</tt:attribute>
+				 </tt:cond-var>
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:cond d-check="exist(ref('ROOT.DOC_NAME'))">
+						<tt:attribute name="ПоФактХЖ" value-ref=".ROOT.DOC_NAME"/>
+				 </tt:cond>
+			</tt:deserialize>
+
+	 </tt:template>
+
+</tt:transform>
