@@ -1,0 +1,124 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+	 <tt:root name="ROOT"/>
+	 <tt:variable name="TMP"/>
+	 <tt:parameter kind="in" name="FUNCTION_PR"/>
+	 <tt:parameter kind="in" name="UTD_CAT"/>
+
+	 <tt:template>
+			<tt:serialize>
+				 <tt:assign ref="ROOT.SRC_TYPE" to-var="TMP"/>
+				 <tt:switch-var>
+						<tt:cond-var check="TMP=N('5') or TMP=N('10') or TMP=N('13') or TMP=N('16')">
+							 <tt:assign to-var="TMP" val="C('СЧФ')"/>
+						</tt:cond-var>
+						<tt:cond-var check="TMP=N('6') or TMP=N('11') or TMP=N('14') or TMP=N('17')">
+							 <tt:assign to-var="TMP" val="C('СЧФДОП')"/>
+						</tt:cond-var>
+						<tt:cond-var check="TMP=N('7') or TMP=N('12') or TMP=N('15') or TMP=N('18')">
+							 <tt:assign to-var="TMP" val="C('ДОП')"/>
+						</tt:cond-var>
+						<tt:cond-var check="TMP=N('20') or TMP=N('21') or TMP=N('22')">
+							 <tt:assign to-var="TMP" val="C('СвЗК')"/>
+						</tt:cond-var>
+						<tt:cond-var check="TMP=N('23') or TMP=N('24') or TMP=N('25')">
+							 <tt:assign to-var="TMP" val="C('СвРК')"/>
+						</tt:cond-var>
+				 </tt:switch-var>
+
+				 <tt:cond-var check="not(FUNCTION_PR='X')">
+						<tt:attribute name="Функция">
+							 <tt:write var="TMP"/>
+						</tt:attribute>
+				 </tt:cond-var>
+				 <tt:cond-var check="FUNCTION_PR='X'">
+						<tt:attribute name="ФункцияПр">
+							 <tt:write var="TMP"/>
+						</tt:attribute>
+				 </tt:cond-var>
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:cond>
+						<tt:attribute name="Функция">
+							 <tt:read var="TMP"/>
+						</tt:attribute>
+				 </tt:cond>
+				 <tt:cond>
+						<tt:attribute name="ФункцияПр">
+							 <tt:read var="TMP"/>
+						</tt:attribute>
+				 </tt:cond>
+
+				 <tt:switch-var>
+						<tt:cond-var check="TMP='СЧФ'">
+							 <tt:cond-var check="UTD_CAT=''">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('5')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='1'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('10')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='2'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('13')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='3'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('16')"/>
+							 </tt:cond-var>
+						</tt:cond-var>
+						<tt:cond-var check="TMP='СЧФДОП'">
+							 <tt:cond-var check="UTD_CAT=''">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('6')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='1'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('11')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='2'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('14')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='3'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('17')"/>
+							 </tt:cond-var>
+						</tt:cond-var>
+						<tt:cond-var check="TMP='ДОП'">
+							 <tt:cond-var check="UTD_CAT=''">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('7')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='1'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('12')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='2'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('15')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='3'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('18')"/>
+							 </tt:cond-var>
+						</tt:cond-var>
+						<tt:cond-var check="TMP='СвЗК'">
+							 <tt:cond-var check="UTD_CAT='1'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('20')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='2'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('21')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='3'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('22')"/>
+							 </tt:cond-var>
+						</tt:cond-var>
+						<tt:cond-var check="TMP='СвРК'">
+							 <tt:cond-var check="UTD_CAT='1'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('23')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='2'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('24')"/>
+							 </tt:cond-var>
+							 <tt:cond-var check="UTD_CAT='3'">
+									<tt:assign to-ref=".ROOT.SRC_TYPE" val="C('25')"/>
+							 </tt:cond-var>
+						</tt:cond-var>
+				 </tt:switch-var>
+			</tt:deserialize>
+
+	 </tt:template>
+
+</tt:transform>

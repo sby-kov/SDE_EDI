@@ -1,0 +1,284 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates" xmlns:ddic="http://www.sap.com/abapxml/types/dictionary" xmlns:def="http://www.sap.com/abapxml/types/defined">
+	 <tt:root name="ROOT" type="ddic:J_3RF_TGXML_PARTNER"/>
+	 <tt:variable name="DEF" val="C('-')" />
+
+	 <tt:template>
+			<tt:cond s-check="not-initial(ref('ROOT.OKPO'))">
+				 <tt:cond d-check="exist(ref('ROOT.OKPO'))">
+						<tt:attribute name="ОКПО" value-ref=".ROOT.OKPO"/>
+				 </tt:cond>
+			</tt:cond>
+
+			<tt:cond s-check="not-initial(ref('ROOT.DIVISION'))">
+				 <tt:cond d-check="exist(ref('ROOT.DIVISION'))">
+						<tt:attribute name="СтруктПодр" value-ref=".ROOT.DIVISION"/>
+				 </tt:cond>
+			</tt:cond>
+
+			<tt:cond s-check="not-initial(ref('ROOT.ADDITIONAL_DATA'))">
+				 <tt:cond d-check="exist(ref('ROOT.ADDITIONAL_DATA'))">
+						<tt:attribute name="ИнфДляУчаст" value-ref=".ROOT.ADDITIONAL_DATA"/>
+				 </tt:cond>
+			</tt:cond>
+
+			<tt:cond s-check="not-initial(ref('ROOT.SHORT_NAME'))">
+				 <tt:cond d-check="exist(ref('ROOT.SHORT_NAME'))">
+						<tt:attribute name="КраткНазв" value-ref=".ROOT.SHORT_NAME"/>
+				 </tt:cond>
+			</tt:cond>
+
+			<ИдСв>
+				 <tt:cond s-check="not(ref('ROOT.PERS_TYPE')='I') and not(ref('ROOT.PERS_TYPE')='N') and not(ref('ROOT.PERS_TYPE')='M')">
+						<tt:cond>
+							 <СвЮЛУч>
+									<tt:attribute name="НаимОрг">
+										 <tt:value ref="ROOT.INF_ORG.ORG_NAME"/>
+									</tt:attribute>
+									<tt:serialize>
+										 <tt:cond check="not-initial(ref('ROOT.INF_ORG.INN'))">
+												<tt:attribute name="ИННЮЛ">
+													 <tt:value ref="ROOT.INF_ORG.INN"/>
+												</tt:attribute>
+										 </tt:cond>
+										 <tt:cond check="initial(ref('ROOT.INF_ORG.INN'))">
+												<tt:attribute name="ДефИННЮЛ">
+													 <tt:write var="DEF"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:serialize>
+									<tt:deserialize>
+										 <tt:cond check="exist(ref('ROOT.INF_ORG.INN'))">
+												<tt:attribute name="ИННЮЛ">
+													 <tt:value ref="ROOT.INF_ORG.INN"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:deserialize>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_ORG.KPP'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_ORG.KPP'))">
+												<tt:attribute name="КПП">
+													 <tt:value ref="ROOT.INF_ORG.KPP"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+							 </СвЮЛУч>
+						</tt:cond>
+				 </tt:cond>
+
+				 <tt:cond s-check="ref('ROOT.PERS_TYPE')='I'">
+						<tt:cond>
+							 <СвИП>
+									<tt:serialize>
+										 <tt:cond check="not-initial(ref('ROOT.INF_PERSON.INN'))">
+												<tt:attribute name="ИННФЛ">
+													 <tt:value ref="ROOT.INF_PERSON.INN"/>
+												</tt:attribute>
+										 </tt:cond>
+										 <tt:cond check="initial(ref('ROOT.INF_PERSON.INN'))">
+												<tt:attribute name="ДефИННФЛ">
+													 <tt:write var="DEF"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:serialize>
+									<tt:deserialize>
+										 <tt:cond check="exist(ref('ROOT.INF_PERSON.INN'))">
+												<tt:attribute name="ИННФЛ">
+													 <tt:value ref="ROOT.INF_PERSON.INN"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:deserialize>
+									<tt:assign to-ref="ROOT.PERS_TYPE" val="'I'"/>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.FIO.SVIDET'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_PERSON.FIO.SVIDET'))">
+												<tt:attribute name="СвГосРегИП">
+													 <tt:value ref="ROOT.INF_PERSON.FIO.SVIDET"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.FIO.ADDITIONAL_DATA'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_PERSON.FIO.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед">
+													 <tt:value ref="ROOT.INF_PERSON.FIO.ADDITIONAL_DATA"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.FIO'))">
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="ROOT.INF_PERSON.FIO"/>
+												</tt:call>
+										 </ФИО>
+									</tt:cond>
+							 </СвИП>
+						</tt:cond>
+				 </tt:cond>
+
+				 <tt:cond s-check="ref('ROOT.PERS_TYPE')='N'">
+						<tt:cond>
+							 <СвЮлНеУч>
+									<tt:attribute name="НаимОрг">
+										 <tt:value ref="ROOT.ORG_NAME"/>
+									</tt:attribute>
+									<tt:assign to-ref="ROOT.PERS_TYPE" val="'N'"/>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_ORG.ADDITIONAL_DATA'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_ORG.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед">
+													 <tt:value ref="ROOT.INF_ORG.ADDITIONAL_DATA"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+							 </СвЮлНеУч>
+						</tt:cond>
+				 </tt:cond>
+				 <tt:cond s-check="ref('ROOT.PERS_TYPE')='M'">
+						<tt:cond>
+							 <СвИнНеУч>
+									<tt:attribute name="НаимОрг">
+										 <tt:value ref="ROOT.ORG_NAME"/>
+									</tt:attribute>
+									<tt:assign to-ref="ROOT.PERS_TYPE" val="'M'"/>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_ORG.ADDITIONAL_DATA'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_ORG.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед">
+													 <tt:value ref="ROOT.INF_ORG.ADDITIONAL_DATA"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_ORG.ORG_ID'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_ORG.ORG_ID'))">
+												<tt:attribute name="Идентиф">
+													 <tt:value ref="ROOT.INF_ORG.ORG_ID"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+							 </СвИнНеУч>
+						</tt:cond>
+				 </tt:cond>
+				 <tt:cond s-check="ref('ROOT.PERS_TYPE')='P'">
+						<tt:cond>
+							 <СвФЛУчастФХЖ>
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.INN'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_PERSON.INN'))">
+												<tt:attribute name="ИННФЛ">
+													 <tt:value ref="ROOT.INF_PERSON.INN"/>
+												</tt:attribute>
+												<tt:assign to-ref="ROOT.PERS_TYPE" val="'P'"/>
+										 </tt:cond>
+									</tt:cond>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.FIO.SVIDET'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_PERSON.FIO.SVIDET'))">
+												<tt:attribute name="ГосРегИПВыдДов">
+													 <tt:value ref="ROOT.INF_PERSON.FIO.SVIDET"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.FIO.ADDITIONAL_DATA'))">
+										 <tt:cond d-check="exist(ref('ROOT.INF_PERSON.FIO.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед">
+													 <tt:value ref="ROOT.INF_PERSON.FIO.ADDITIONAL_DATA"/>
+												</tt:attribute>
+										 </tt:cond>
+									</tt:cond>
+
+									<tt:cond s-check="not-initial(ref('ROOT.INF_PERSON.FIO'))">
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="ROOT.INF_PERSON.FIO"/>
+												</tt:call>
+										 </ФИО>
+									</tt:cond>
+							 </СвФЛУчастФХЖ>
+						</tt:cond>
+				 </tt:cond>
+			</ИдСв>
+
+
+			<tt:cond s-check="not-initial(ref('ROOT.ADDRESS'))">
+				 <tt:call transformation="J_3RF_TG_SUB_ADDR_02">
+						<tt:with-root name="ROOT" ref="ROOT.ADDRESS"/>
+				 </tt:call>
+			</tt:cond>
+
+			<tt:cond s-check="not-initial(ref('ROOT.PHONE')) or not-initial(ref('ROOT.EMAIL'))">
+				 <tt:cond>
+						<Контакт>
+
+							 <tt:cond s-check="not-initial(ref('ROOT.PHONE'))">
+									<tt:cond d-check="exist(ref('ROOT.PHONE'))">
+										 <tt:attribute name="Тлф">
+												<tt:value ref="ROOT.PHONE"/>
+										 </tt:attribute>
+									</tt:cond>
+							 </tt:cond>
+
+							 <tt:cond s-check="not-initial(ref('ROOT.EMAIL'))">
+									<tt:cond d-check="exist(ref('ROOT.EMAIL'))">
+										 <tt:attribute name="ЭлПочта">
+												<tt:value ref="ROOT.EMAIL"/>
+										 </tt:attribute>
+									</tt:cond>
+							 </tt:cond>
+
+						</Контакт>
+				 </tt:cond>
+			</tt:cond>
+
+
+			<tt:cond s-check="not-initial(ref('ROOT.BANK_ACC_NUM')) or not-initial(ref('ROOT.BANK_CORR_ACC_NUM')) or not-initial(ref('ROOT.BANK_NAME')) or not-initial(ref('ROOT.BANK_BIK'))">
+				 <tt:cond>
+						<БанкРекв>
+							 <tt:cond s-check="not-initial(ref('ROOT.BANK_ACC_NUM'))">
+									<tt:cond d-check="exist(ref('ROOT.BANK_ACC_NUM'))">
+										 <tt:attribute name="НомерСчета">
+												<tt:value ref="ROOT.BANK_ACC_NUM"/>
+										 </tt:attribute>
+									</tt:cond>
+							 </tt:cond>
+
+							 <tt:cond s-check="not-initial(ref('ROOT.BANK_NAME')) or not-initial(ref('ROOT.BANK_BIK')) or not-initial(ref('ROOT.BANK_CORR_ACC_NUM'))">
+									<tt:cond>
+										 <СвБанк>
+												<tt:cond s-check="not-initial(ref('ROOT.BANK_NAME'))">
+													 <tt:cond d-check="exist(ref('ROOT.BANK_NAME'))">
+															<tt:attribute name="НаимБанк">
+																 <tt:value ref="ROOT.BANK_NAME"/>
+															</tt:attribute>
+													 </tt:cond>
+												</tt:cond>
+
+												<tt:cond s-check="not-initial(ref('ROOT.BANK_BIK'))">
+													 <tt:cond d-check="exist(ref('ROOT.BANK_BIK'))">
+															<tt:attribute name="БИК">
+																 <tt:value ref="ROOT.BANK_BIK"/>
+															</tt:attribute>
+													 </tt:cond>
+												</tt:cond>
+
+												<tt:cond s-check="not-initial(ref('ROOT.BANK_CORR_ACC_NUM'))">
+													 <tt:cond d-check="exist(ref('ROOT.BANK_CORR_ACC_NUM'))">
+															<tt:attribute name="КорСчет">
+																 <tt:value ref="ROOT.BANK_CORR_ACC_NUM"/>
+															</tt:attribute>
+													 </tt:cond>
+												</tt:cond>
+										 </СвБанк>
+									</tt:cond>
+							 </tt:cond>
+						</БанкРекв>
+				 </tt:cond>
+			</tt:cond>
+
+	 </tt:template>
+
+</tt:transform>

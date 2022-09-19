@@ -1,0 +1,504 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates"
+							xmlns:ddic="http://www.sap.com/abapxml/types/dictionary"
+							xmlns:def="http://www.sap.com/abapxml/types/defined">
+
+	 <tt:root name="ROOT" type="ddic:J_3RF_DIXML_SCHFDOPPR"/>
+	 <tt:variable name="DATE"/>
+	 <tt:variable name="TIME"/>
+	 <tt:variable name="TMP"/>
+	 <tt:template>
+
+			<!-- Файл/Документ/СвПродПер -->
+			<tt:serialize>
+				 <tt:assign to-var="TMP" val="C('')"/>
+				 <tt:cond check="ref('ROOT.SRC_TYPE')=N('6') or ref('ROOT.SRC_TYPE')=N('7') or
+                      ref('ROOT.SRC_TYPE')=N('11') or ref('ROOT.SRC_TYPE')=N('12') or
+                      ref('ROOT.SRC_TYPE')=N('14') or ref('ROOT.SRC_TYPE')=N('15') or
+                      ref('ROOT.SRC_TYPE')=N('17') or ref('ROOT.SRC_TYPE')=N('18')">
+						<tt:assign to-var="TMP" val="C('X')"/>
+				 </tt:cond>
+				 <tt:cond check="not-initial(ref('ROOT.SHIPMENT_OPERATION_CONTENT')) or not-initial(ref('ROOT.SHIPMENT_BASE'))">
+						<tt:assign to-var="TMP" val="C('X')"/>
+				 </tt:cond>
+				 <tt:cond-var check="TMP=C('X')">
+						<СвПродПер>
+							 <СвПер>
+									<tt:assign ref="ROOT.SHIPMENT_OPERATION_CONTENT" to-var="TMP"/>
+									<tt:cond check="initial(ref('ROOT.SHIPMENT_OPERATION_CONTENT'))">
+										 <tt:assign to-var="TMP" val="C('Товары переданы/Услуги оказаны в полном объеме')"/>
+									</tt:cond>
+									<tt:attribute name="СодОпер">
+										 <tt:write var="TMP"/>
+									</tt:attribute>
+									<tt:cond check="not-initial(ref('ROOT.SHIPMENT_OPERATION_TYPE'))">
+										 <tt:attribute name="ВидОпер">
+												<tt:value ref="ROOT.SHIPMENT_OPERATION_TYPE"/>
+										 </tt:attribute>
+									</tt:cond>
+
+									<tt:cond check="not-initial(ref('ROOT.SHIPMENT_OPERATION_DATE'))">
+										 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+												<tt:with-parameter ref="ROOT.SHIPMENT_OPERATION_DATE" s-name="DATE_IF"/>
+												<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+										 </tt:call-method>
+										 <tt:attribute name="ДатаПер">
+												<tt:write var="DATE"/>
+										 </tt:attribute>
+									</tt:cond>
+
+									<tt:cond check="(ref('ROOT.SRC_TYPE')!=N('5') or ref('ROOT.SRC_TYPE')!=N('6') or ref('ROOT.SRC_TYPE')!=N('7')) and
+                             not-initial(ref('ROOT.SHIPMENT_PERIOD_START'))">
+										 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+												<tt:with-parameter ref="ROOT.SHIPMENT_PERIOD_START" s-name="DATE_IF"/>
+												<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+										 </tt:call-method>
+										 <tt:attribute name="ДатаНач">
+												<tt:write var="DATE"/>
+										 </tt:attribute>
+									</tt:cond>
+
+									<tt:cond check="(ref('ROOT.SRC_TYPE')!=N('5') or ref('ROOT.SRC_TYPE')!=N('6') or ref('ROOT.SRC_TYPE')!=N('7')) and
+                             not-initial(ref('ROOT.SHIPMENT_PERIOD_END'))">
+										 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+												<tt:with-parameter ref="ROOT.SHIPMENT_PERIOD_END" s-name="DATE_IF"/>
+												<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+										 </tt:call-method>
+										 <tt:attribute name="ДатаОкон">
+												<tt:write var="DATE"/>
+										 </tt:attribute>
+									</tt:cond>
+
+									<tt:cond check="initial(ref('ROOT.SHIPMENT_BASE'))">
+										 <ОснПер>
+												<tt:cond check="ref('ROOT.SRC_TYPE')=N('5') or ref('ROOT.SRC_TYPE')=N('6') or ref('ROOT.SRC_TYPE')=N('7')">
+													 <tt:attribute name="НаимОсн">Отсутствует</tt:attribute>
+												</tt:cond>
+												<tt:cond check="ref('ROOT.SRC_TYPE')=N('10') or ref('ROOT.SRC_TYPE')=N('11') or ref('ROOT.SRC_TYPE')=N('12') or
+                                ref('ROOT.SRC_TYPE')=N('13') or ref('ROOT.SRC_TYPE')=N('14') or ref('ROOT.SRC_TYPE')=N('15') or
+                                ref('ROOT.SRC_TYPE')=N('16') or ref('ROOT.SRC_TYPE')=N('17') or ref('ROOT.SRC_TYPE')=N('18')">
+													 <tt:attribute name="НаимОсн">Без документа-основания</tt:attribute>
+												</tt:cond>
+										 </ОснПер>
+									</tt:cond>
+
+									<tt:loop name="LINE" ref="ROOT.SHIPMENT_BASE">
+										 <ОснПер>
+												<tt:attribute name="НаимОсн">
+													 <tt:value ref="$LINE.DOC_NAME"/>
+												</tt:attribute>
+												<tt:cond check="not-initial(ref('$LINE.DOC_NUM'))">
+													 <tt:attribute name="НомОсн">
+															<tt:value ref="$LINE.DOC_NUM"/>
+													 </tt:attribute>
+												</tt:cond>
+
+												<tt:cond check="not-initial(ref('$LINE.DOC_DATE'))">
+													 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+															<tt:with-parameter ref="$LINE.DOC_DATE" s-name="DATE_IF"/>
+															<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+													 </tt:call-method>
+													 <tt:attribute name="ДатаОсн">
+															<tt:write var="DATE"/>
+													 </tt:attribute>
+												</tt:cond>
+
+												<tt:cond check="not-initial(ref('$LINE.EXTRA_INFO'))">
+													 <tt:attribute name="ДопСвОсн">
+															<tt:value ref="$LINE.EXTRA_INFO"/>
+													 </tt:attribute>
+												</tt:cond>
+										 </ОснПер>
+									</tt:loop>
+
+									<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON'))">
+										 <СвЛицПер>
+												<tt:cond check="not(ref(ROOT.SHIPMENT_PERS_TYPE)='R') and not(ref(ROOT.SHIPMENT_PERS_TYPE)='P')">
+													 <РабОргПрод>
+															<tt:attribute name="Должность">
+																 <tt:value ref="ROOT.SHIPMENT_PERSON.JOBPOS"/>
+															</tt:attribute>
+															<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA'))">
+																 <tt:attribute name="ИныеСвед">
+																		<tt:value ref="ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA"/>
+																 </tt:attribute>
+															</tt:cond>
+															<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS'))">
+																 <tt:attribute name="ОснПолн">
+																		<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS"/>
+																 </tt:attribute>
+															</tt:cond>
+															<ФИО>
+																 <tt:call transformation="J_3RF_SUBTR_FIO">
+																		<tt:with-root name="ROOT" ref="ROOT.SHIPMENT_PERSON"/>
+																 </tt:call>
+															</ФИО>
+													 </РабОргПрод>
+												</tt:cond>
+
+												<tt:cond check="ref(ROOT.SHIPMENT_PERS_TYPE)='R' or ref(ROOT.SHIPMENT_PERS_TYPE)='P'">
+													 <ИнЛицо>
+															<tt:cond check="ref(ROOT.SHIPMENT_PERS_TYPE)='R'">
+																 <ПредОргПер>
+																		<tt:attribute name="Должность">
+																			 <tt:value ref="ROOT.SHIPMENT_PERSON.JOBPOS"/>
+																		</tt:attribute>
+
+																		<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA'))">
+																			 <tt:attribute name="ИныеСвед">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<tt:attribute name="НаимОргПер">
+																			 <tt:value ref="ROOT.SHIPMENT_PERSON.ORG_NAME"/>
+																		</tt:attribute>
+
+																		<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS_ORG'))">
+																			 <tt:attribute name="ОснДоверОргПер">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS_ORG"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS'))">
+																			 <tt:attribute name="ОснПолнПредПер">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<ФИО>
+																			 <tt:call transformation="J_3RF_SUBTR_FIO">
+																					<tt:with-root name="ROOT" ref="ROOT.SHIPMENT_PERSON"/>
+																			 </tt:call>
+																		</ФИО>
+																 </ПредОргПер>
+															</tt:cond>
+
+															<tt:cond check="ref(ROOT.SHIPMENT_PERS_TYPE)='P'">
+																 <ФЛПер>
+																		<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA'))">
+																			 <tt:attribute name="ИныеСвед">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<tt:cond check="not-initial(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS'))">
+																			 <tt:attribute name="ОснДоверФЛ">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<ФИО>
+																			 <tt:call transformation="J_3RF_SUBTR_FIO">
+																					<tt:with-root name="ROOT" ref="ROOT.SHIPMENT_PERSON"/>
+																			 </tt:call>
+																		</ФИО>
+																 </ФЛПер>
+															</tt:cond>
+													 </ИнЛицо>
+												</tt:cond>
+										 </СвЛицПер>
+									</tt:cond>
+
+									<tt:cond check="not-initial(ref('ROOT.SHIPMENT_TR_WB_INFO')) or not-initial(ref('ROOT.SHIPMENT_TR_WB')) or not-initial(ref('ROOT.SHIPMENT_CARRIER'))">
+										 <ТранГруз>
+												<tt:cond check="not-initial(ref('ROOT.SHIPMENT_TR_WB_INFO'))">
+													 <tt:attribute name="СвТранГруз">
+															<tt:value ref="ROOT.SHIPMENT_TR_WB_INFO"/>
+													 </tt:attribute>
+												</tt:cond>
+
+												<tt:loop name="LINE" ref="ROOT.SHIPMENT_TR_WB">
+													 <ТранНакл>
+															<tt:attribute name="НомТранНакл">
+																 <tt:value ref="$LINE.TR_WB_NUM"/>
+															</tt:attribute>
+															<tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+																 <tt:with-parameter ref="$LINE.TR_WB_DATE" s-name="DATE_IF"/>
+																 <tt:with-parameter s-name="DATE_EF" var="DATE"/>
+															</tt:call-method>
+															<tt:attribute name="ДатаТранНакл">
+																 <tt:write var="DATE"/>
+															</tt:attribute>
+													 </ТранНакл>
+												</tt:loop>
+
+												<tt:cond check="not-initial(ref('ROOT.SHIPMENT_CARRIER'))">
+													 <Перевозчик>
+															<tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+																 <tt:with-root name="ROOT" ref="ROOT.SHIPMENT_CARRIER"/>
+															</tt:call>
+													 </Перевозчик>
+												</tt:cond>
+										 </ТранГруз>
+									</tt:cond>
+
+									<tt:cond check="not-initial(ref('ROOT.CONTR_BASED_GOOD_DATE')) or not-initial(ref('ROOT.CONTR_BASED_GOOD_INFO'))">
+										 <СвПерВещи>
+												<tt:cond check="not-initial(ref('ROOT.CONTR_BASED_GOOD_DATE'))">
+													 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+															<tt:with-parameter ref="ROOT.CONTR_BASED_GOOD_DATE" s-name="DATE_IF"/>
+															<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+													 </tt:call-method>
+													 <tt:attribute name="ДатаПерВещ">
+															<tt:write var="DATE"/>
+													 </tt:attribute>
+												</tt:cond>
+												<tt:cond check="not-initial(ref('ROOT.CONTR_BASED_GOOD_INFO'))">
+													 <tt:attribute name="СвПерВещ">
+															<tt:value ref="ROOT.CONTR_BASED_GOOD_INFO"/>
+													 </tt:attribute>
+												</tt:cond>
+										 </СвПерВещи>
+									</tt:cond>
+							 </СвПер>
+
+							 <tt:cond check="not-initial(ref('ROOT.SHIPMENT_INFO_FILE_ID')) or not-initial(ref('ROOT.SHIPMENT_INFO_TEXT'))">
+									<ИнфПолФХЖ3>
+										 <tt:cond check="not-initial(ref('ROOT.SHIPMENT_INFO_FILE_ID'))">
+												<tt:attribute name="ИдФайлИнфПол" value-ref="ROOT.SHIPMENT_INFO_FILE_ID"/>
+										 </tt:cond>
+										 <tt:loop name="LINE" ref="ROOT.SHIPMENT_INFO_TEXT">
+												<ТекстИнф>
+													 <tt:attribute name="Идентиф">
+															<tt:value ref="$LINE.INFOID"/>
+													 </tt:attribute>
+													 <tt:attribute name="Значен">
+															<tt:value ref="$LINE.INFOTEXT"/>
+													 </tt:attribute>
+												</ТекстИнф>
+										 </tt:loop>
+									</ИнфПолФХЖ3>
+							 </tt:cond>
+						</СвПродПер>
+				 </tt:cond-var>
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:cond>
+						<СвПродПер>
+							 <СвПер>
+									<tt:attribute name="СодОпер">
+										 <tt:value ref="ROOT.SHIPMENT_OPERATION_CONTENT"/>
+									</tt:attribute>
+									<tt:cond d-check="exist(ref('ROOT.SHIPMENT_OPERATION_TYPE'))">
+										 <tt:attribute name="ВидОпер">
+												<tt:value ref="ROOT.SHIPMENT_OPERATION_TYPE"/>
+										 </tt:attribute>
+									</tt:cond>
+									<tt:cond d-check="exist(ref('ROOT.SHIPMENT_OPERATION_DATE'))">
+										 <tt:attribute name="ДатаПер">
+												<tt:read var="DATE"/>
+										 </tt:attribute>
+										 <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+												<tt:with-parameter d-name="DATE_EF" var="DATE"/>
+												<tt:with-parameter d-name="DATE_IF" ref="ROOT.SHIPMENT_OPERATION_DATE"/>
+										 </tt:call-method>
+									</tt:cond>
+									<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERIOD_START'))">
+										 <tt:attribute name="ДатаНач">
+												<tt:read var="DATE"/>
+										 </tt:attribute>
+										 <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+												<tt:with-parameter d-name="DATE_EF" var="DATE"/>
+												<tt:with-parameter d-name="DATE_IF" ref="ROOT.SHIPMENT_PERIOD_START"/>
+										 </tt:call-method>
+									</tt:cond>
+									<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERIOD_END'))">
+										 <tt:attribute name="ДатаОкон">
+												<tt:read var="DATE"/>
+										 </tt:attribute>
+										 <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+												<tt:with-parameter d-name="DATE_EF" var="DATE"/>
+												<tt:with-parameter d-name="DATE_IF" ref="ROOT.SHIPMENT_PERIOD_END"/>
+										 </tt:call-method>
+									</tt:cond>
+
+									<tt:loop name="LINE" ref="ROOT.SHIPMENT_BASE">
+										 <ОснПер>
+												<tt:attribute name="НаимОсн">
+													 <tt:value ref="$LINE.DOC_NAME"/>
+												</tt:attribute>
+												<tt:cond d-check="exist(ref('$LINE.DOC_NUM'))">
+													 <tt:attribute name="НомОсн">
+															<tt:value ref="$LINE.DOC_NUM"/>
+													 </tt:attribute>
+												</tt:cond>
+
+												<tt:cond d-check="exist(ref('$LINE.DOC_DATE'))">
+													 <tt:attribute name="ДатаОсн">
+															<tt:read var="DATE"/>
+													 </tt:attribute>
+													 <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+															<tt:with-parameter d-name="DATE_EF" var="DATE"/>
+															<tt:with-parameter d-name="DATE_IF" ref="$LINE.DOC_DATE"/>
+													 </tt:call-method>
+												</tt:cond>
+
+												<tt:cond d-check="exist(ref('$LINE.EXTRA_INFO'))">
+													 <tt:attribute name="ДопСвОсн">
+															<tt:value ref="$LINE.EXTRA_INFO"/>
+													 </tt:attribute>
+												</tt:cond>
+
+												<tt:cond d-check="exist(ref('$LINE.DOC_ID'))">
+													 <tt:attribute name="ИдентОсн">
+															<tt:value ref="$LINE.DOC_ID"/>
+													 </tt:attribute>
+												</tt:cond>
+										 </ОснПер>
+									</tt:loop>
+
+									<tt:cond>
+										 <СвЛицПер>
+												<tt:cond>
+													 <РабОргПрод>
+															<tt:attribute name="Должность">
+																 <tt:value ref="ROOT.SHIPMENT_PERSON.JOBPOS"/>
+															</tt:attribute>
+															<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA'))">
+																 <tt:attribute name="ИныеСвед">
+																		<tt:value ref="ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA"/>
+																 </tt:attribute>
+															</tt:cond>
+															<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS'))">
+																 <tt:attribute name="ОснПолн">
+																		<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS"/>
+																 </tt:attribute>
+															</tt:cond>
+															<ФИО>
+																 <tt:call transformation="J_3RF_SUBTR_FIO">
+																		<tt:with-root name="ROOT" ref="ROOT.SHIPMENT_PERSON"/>
+																 </tt:call>
+															</ФИО>
+													 </РабОргПрод>
+												</tt:cond>
+
+												<tt:cond>
+													 <ИнЛицо>
+															<tt:cond>
+																 <ПредОргПер>
+																		<tt:attribute name="Должность">
+																			 <tt:value ref="ROOT.SHIPMENT_PERSON.JOBPOS"/>
+																		</tt:attribute>
+																		<tt:attribute name="НаимОргПер">
+																			 <tt:value ref="ROOT.SHIPMENT_PERSON.ORG_NAME"/>
+																		</tt:attribute>
+																		<tt:assign to-ref="ROOT.SHIPMENT_PERS_TYPE" val="'R'"/>
+
+																		<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA'))">
+																			 <tt:attribute name="ИныеСвед">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS_ORG'))">
+																			 <tt:attribute name="ОснДоверОргПер">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS_ORG"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS'))">
+																			 <tt:attribute name="ОснПолнПредПер">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<ФИО>
+																			 <tt:call transformation="J_3RF_SUBTR_FIO">
+																					<tt:with-root name="ROOT" ref="ROOT.SHIPMENT_PERSON"/>
+																			 </tt:call>
+																		</ФИО>
+																 </ПредОргПер>
+															</tt:cond>
+
+															<tt:cond>
+																 <ФЛПер>
+																		<tt:assign to-ref="ROOT.SHIPMENT_PERS_TYPE" val="'P'"/>
+
+																		<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA'))">
+																			 <tt:attribute name="ИныеСвед">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.ADDITIONAL_DATA"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<tt:cond d-check="exist(ref('ROOT.SHIPMENT_PERSON.AUTH_BASIS'))">
+																			 <tt:attribute name="ОснДоверФЛ">
+																					<tt:value ref="ROOT.SHIPMENT_PERSON.AUTH_BASIS"/>
+																			 </tt:attribute>
+																		</tt:cond>
+
+																		<ФИО>
+																			 <tt:call transformation="J_3RF_SUBTR_FIO">
+																					<tt:with-root name="ROOT" ref="ROOT.SHIPMENT_PERSON"/>
+																			 </tt:call>
+																		</ФИО>
+																 </ФЛПер>
+															</tt:cond>
+													 </ИнЛицо>
+												</tt:cond>
+										 </СвЛицПер>
+									</tt:cond>
+
+									<tt:cond>
+										 <ТранГруз>
+												<tt:cond d-check="exist(ref('ROOT.SHIPMENT_TR_WB_INFO'))">
+													 <tt:attribute name="СвТранГруз">
+															<tt:value ref="ROOT.SHIPMENT_TR_WB_INFO"/>
+													 </tt:attribute>
+												</tt:cond>
+
+												<tt:loop name="LINE" ref="ROOT.SHIPMENT_TR_WB">
+													 <ТранНакл>
+															<tt:attribute name="НомТранНакл">
+																 <tt:value ref="$LINE.TR_WB_NUM"/>
+															</tt:attribute>
+															<tt:attribute name="ДатаТранНакл">
+																 <tt:read var="DATE"/>
+															</tt:attribute>
+															<tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+																 <tt:with-parameter d-name="DATE_EF" var="DATE"/>
+																 <tt:with-parameter d-name="DATE_IF" ref="$LINE.TR_WB_DATE"/>
+															</tt:call-method>
+													 </ТранНакл>
+												</tt:loop>
+
+												<tt:cond>
+													 <Перевозчик>
+															<tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+																 <tt:with-root name="ROOT" ref="ROOT.SHIPMENT_CARRIER"/>
+															</tt:call>
+													 </Перевозчик>
+												</tt:cond>
+										 </ТранГруз>
+									</tt:cond>
+
+									<tt:cond>
+										 <СвПерВещи>
+										 </СвПерВещи>
+									</tt:cond>
+							 </СвПер>
+
+							 <tt:cond>
+									<ИнфПолФХЖ3>
+										 <tt:cond d-check="exist(ref('ROOT.SHIPMENT_INFO_FILE_ID'))">
+												<tt:attribute name="ИдФайлИнфПол" value-ref="ROOT.SHIPMENT_INFO_FILE_ID"/>
+										 </tt:cond>
+										 <tt:loop name="LINE" ref="ROOT.SHIPMENT_INFO_TEXT">
+												<ТекстИнф>
+													 <tt:attribute name="Идентиф">
+															<tt:value ref="$LINE.INFOID"/>
+													 </tt:attribute>
+													 <tt:attribute name="Значен">
+															<tt:value ref="$LINE.INFOTEXT"/>
+													 </tt:attribute>
+												</ТекстИнф>
+										 </tt:loop>
+									</ИнфПолФХЖ3>
+							 </tt:cond>
+						</СвПродПер>
+				 </tt:cond>
+			</tt:deserialize>
+
+	 </tt:template>
+</tt:transform>

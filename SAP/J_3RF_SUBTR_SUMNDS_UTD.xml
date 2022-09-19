@@ -1,0 +1,44 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+	 <tt:root name="ROOT"/>
+	 <tt:variable name="SUMNDS"/>
+	 <tt:template>
+
+			<tt:serialize>
+				 <tt:assign to-var="SUMNDS" ref="ROOT"/>
+
+				 <tt:cond check="ROOT != 'X'">
+						<СумНал> <tt:write var="SUMNDS"/> </СумНал>
+				 </tt:cond>
+
+				 <tt:cond check="ROOT = 'X'">
+						<tt:assign to-var="SUMNDS" val="'без НДС'"/>
+						<БезНДС> <tt:write var="SUMNDS"/> </БезНДС>
+				 </tt:cond>
+			</tt:serialize>
+
+
+			<tt:deserialize>
+				 <tt:cond>
+						<СумНал> <tt:read var="SUMNDS"/> </СумНал>
+				 </tt:cond>
+
+				 <tt:cond>
+						<БезНДС> <tt:read var="SUMNDS"/> </БезНДС>
+				 </tt:cond>
+
+				 <tt:cond>
+						<ДефНДС> <tt:read var="SUMNDS"/> </ДефНДС>
+				 </tt:cond>
+
+				 <tt:cond-var check="SUMNDS = 'без НДС' or SUMNDS = '-'">
+						<tt:assign to-ref="ROOT" val="'X'"/>
+				 </tt:cond-var>
+
+				 <tt:cond-var check="SUMNDS != 'без НДС'">
+						<tt:assign to-ref="ROOT" var="SUMNDS"/>
+				 </tt:cond-var>
+			</tt:deserialize>
+
+	 </tt:template>
+</tt:transform>

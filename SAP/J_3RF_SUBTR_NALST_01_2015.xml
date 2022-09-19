@@ -1,0 +1,51 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+	 <tt:root name="ROOT"/>
+	 <tt:variable name="VAT_RATE"/>
+
+	 <tt:template>
+
+			<tt:serialize>
+
+				 <tt:cond check="ROOT.VAT_RATE = 'X' and ROOT.VAT_TYPE = 'TEXT'">
+						<tt:assign to-var="VAT_RATE" val="'без НДС'"/>
+				 </tt:cond>
+				 <tt:cond check="ROOT.VAT_RATE = 'N' and ROOT.VAT_TYPE = 'TEXT'">
+						<tt:assign to-var="VAT_RATE" val="'НДС исчисляется налоговым агентом'"/>
+				 </tt:cond>
+				 <tt:cond check="not(ROOT.VAT_TYPE = 'TEXT' and (ROOT.VAT_RATE = 'X' or ROOT.VAT_RATE = 'N'))">
+						<tt:call-method class="J_3RF_TRANSF_01" s-name="INALST_TO_ENALST">
+							 <tt:with-parameter ref="ROOT.VAT_RATE" s-name="VAT_RATE_IF"/>
+							 <tt:with-parameter ref="ROOT.VAT_TYPE" s-name="VAT_TYPE_IF"/>
+							 <tt:with-parameter s-name="NALST_EF" var="VAT_RATE"/>
+						</tt:call-method>
+				 </tt:cond>
+
+				 <tt:write var="VAT_RATE"/>
+
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:read var="VAT_RATE"/>
+
+				 <tt:cond-var check="VAT_RATE = 'без НДС'">
+						<tt:assign to-ref="ROOT.VAT_RATE" val="'X'"/>
+						<tt:assign to-ref="ROOT.VAT_TYPE" val="'TEXT'"/>
+				 </tt:cond-var>
+				 <tt:cond-var check="VAT_RATE = 'НДС исчисляется налоговым агентом'">
+						<tt:assign to-ref="ROOT.VAT_RATE" val="'N'"/>
+						<tt:assign to-ref="ROOT.VAT_TYPE" val="'TEXT'"/>
+				 </tt:cond-var>
+				 <tt:cond-var check="not(VAT_RATE = 'без НДС' or VAT_RATE = 'НДС исчисляется налоговым агентом')">
+						<tt:call-method class="J_3RF_TRANSF_01" d-name="ENALST_TO_INALST">
+							 <tt:with-parameter d-name="NALST_EF" var="VAT_RATE"/>
+							 <tt:with-parameter d-name="VAT_RATE_IF" ref="ROOT.VAT_RATE"/>
+							 <tt:with-parameter d-name="VAT_TYPE_IF" ref="ROOT.VAT_TYPE"/>
+						</tt:call-method>
+				 </tt:cond-var>
+
+			</tt:deserialize>
+
+	 </tt:template>
+</tt:transform>

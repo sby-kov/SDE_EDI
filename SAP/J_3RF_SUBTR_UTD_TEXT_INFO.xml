@@ -1,0 +1,58 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+	 <tt:root name="ROOT"/>
+	 <tt:variable name="INDEX" val="'0'"/>
+
+	 <tt:template>
+			<tt:cond s-check="not-initial(ref('ROOT.INFO_FILE_ID'))">
+				 <tt:cond d-check="exist(ref('ROOT.INFO_FILE_ID'))">
+						<tt:attribute name="ИдФайлИнфПол">
+							 <tt:value ref="ROOT.INFO_FILE_ID"/>
+						</tt:attribute>
+				 </tt:cond>
+			</tt:cond>
+
+			<tt:loop name="INFO_TEXT_LINE" ref="ROOT.INFO_TEXT">
+
+				 <tt:switch-var>
+						<tt:cond-var check="INDEX='0'"> <tt:assign to-var="INDEX" val="'1'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='1'"> <tt:assign to-var="INDEX" val="'2'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='2'"> <tt:assign to-var="INDEX" val="'3'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='3'"> <tt:assign to-var="INDEX" val="'4'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='4'"> <tt:assign to-var="INDEX" val="'5'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='5'"> <tt:assign to-var="INDEX" val="'6'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='6'"> <tt:assign to-var="INDEX" val="'7'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='7'"> <tt:assign to-var="INDEX" val="'8'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='8'"> <tt:assign to-var="INDEX" val="'9'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='9'"> <tt:assign to-var="INDEX" val="'10'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='10'"> <tt:assign to-var="INDEX" val="'11'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='11'"> <tt:assign to-var="INDEX" val="'12'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='12'"> <tt:assign to-var="INDEX" val="'13'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='13'"> <tt:assign to-var="INDEX" val="'14'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='14'"> <tt:assign to-var="INDEX" val="'15'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='15'"> <tt:assign to-var="INDEX" val="'16'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='16'"> <tt:assign to-var="INDEX" val="'17'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='17'"> <tt:assign to-var="INDEX" val="'18'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='18'"> <tt:assign to-var="INDEX" val="'19'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='19'"> <tt:assign to-var="INDEX" val="'20'"/> </tt:cond-var>
+						<tt:cond-var check="INDEX='20'"> <tt:assign to-var="INDEX" val="'21'"/> </tt:cond-var>
+				 </tt:switch-var>
+
+				 <tt:serialize>
+						<tt:cond-var check="not(INDEX='21')">
+							 <ТекстИнф>
+									<tt:attribute name="Идентиф"> <tt:value ref="$INFO_TEXT_LINE.INFOID"/> </tt:attribute>
+									<tt:attribute name="Значен"> <tt:value ref="$INFO_TEXT_LINE.INFOTEXT"/> </tt:attribute>
+							 </ТекстИнф>
+						</tt:cond-var>
+				 </tt:serialize>
+				 <tt:deserialize>
+						<ТекстИнф>
+							 <tt:attribute name="Идентиф"> <tt:value ref="$INFO_TEXT_LINE.INFOID"/> </tt:attribute>
+							 <tt:attribute name="Значен"> <tt:value ref="$INFO_TEXT_LINE.INFOTEXT"/> </tt:attribute>
+						</ТекстИнф>
+				 </tt:deserialize>
+
+			</tt:loop>
+	 </tt:template>
+</tt:transform>

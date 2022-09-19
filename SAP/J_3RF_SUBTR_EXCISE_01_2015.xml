@@ -1,0 +1,47 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+	 <tt:root name="ROOT"/>
+	 <tt:variable name = "Excise"/>
+	 <tt:template>
+			<tt:serialize>
+				 <tt:assign to-var="Excise" ref="ROOT"/>
+
+				 <tt:cond check="ROOT != 'X'">
+						<tt:cond check="ROOT != '-'">
+							 <СумАкциз> <tt:write var="Excise"/> </СумАкциз>
+						</tt:cond>
+						<tt:cond check="ROOT = '-'">
+							 <tt:assign to-var="Excise" val="'0.00'"/>
+							 <СумАкциз> <tt:write var="Excise"/> </СумАкциз>
+						</tt:cond>
+				 </tt:cond>
+
+				 <tt:cond check="ROOT = 'X'">
+						<tt:assign to-var="Excise" val="'без акциза'"/>
+						<БезАкциз> <tt:write var="Excise"/> </БезАкциз>
+				 </tt:cond>
+
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:cond>
+						<СумАкциз> <tt:read var="Excise"/> </СумАкциз>
+				 </tt:cond>
+
+				 <tt:cond>
+						<БезАкциз> <tt:read var="Excise"/> </БезАкциз>
+				 </tt:cond>
+
+				 <tt:cond-var check="Excise = 'без акциза'">
+						<tt:assign to-ref="ROOT" val="'X'"/>
+				 </tt:cond-var>
+
+				 <tt:cond-var check="Excise != 'без акциза'">
+						<tt:assign to-ref="ROOT" var="Excise"/>
+				 </tt:cond-var>
+
+			</tt:deserialize>
+
+	 </tt:template>
+</tt:transform>

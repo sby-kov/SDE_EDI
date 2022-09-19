@@ -1,0 +1,93 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+	 <tt:root name="ROOT"/>
+	 <tt:parameter kind="in" name="UTD_CAT"/>
+
+	 <tt:variable name="DEF" val="C('-')"/>
+
+	 <tt:template>
+			<ВсегоОпл>
+
+				 <tt:serialize>
+						<tt:cond check="not-initial(ref('ROOT.SMNET'))">
+							 <tt:attribute name="СтТовБезНДСВсего">
+									<tt:value ref="ROOT.SMNET"/>
+							 </tt:attribute>
+						</tt:cond>
+				 </tt:serialize>
+				 <tt:deserialize>
+						<tt:cond check="exist(ref('ROOT.SMNET'))">
+							 <tt:attribute name="СтТовБезНДСВсего">
+									<tt:value ref="ROOT.SMNET"/>
+							 </tt:attribute>
+						</tt:cond>
+				 </tt:deserialize>
+
+				 <tt:switch-var>
+						<tt:cond-var check="UTD_CAT=''">
+							 <tt:attribute name="СтТовУчНалВсего">
+									<tt:value ref="ROOT.SMTOT"/>
+							 </tt:attribute>
+						</tt:cond-var>
+						<tt:cond-var>
+							 <tt:serialize>
+									<tt:cond check="not-initial(ref('ROOT.SMTOT'))">
+										 <tt:attribute name="СтТовУчНалВсего">
+												<tt:value ref="ROOT.SMTOT"/>
+										 </tt:attribute>
+									</tt:cond>
+									<tt:cond check="initial(ref('ROOT.SMTOT'))">
+										 <tt:attribute name="ДефСтТовУчНалВсего"><tt:write var="DEF"/></tt:attribute>
+									</tt:cond>
+							 </tt:serialize>
+							 <tt:deserialize>
+									<tt:cond check="exist(ref('ROOT.SMTOT'))">
+										 <tt:attribute name="СтТовУчНалВсего">
+												<tt:value ref="ROOT.SMTOT"/>
+										 </tt:attribute>
+									</tt:cond>
+							 </tt:deserialize>
+						</tt:cond-var>
+				 </tt:switch-var>
+
+				 <СумНалВсего>
+						<tt:call transformation="J_3RF_SUBTR_SUMNDS_UTD">
+							 <tt:with-root name="ROOT" ref="ROOT.SMVAT"/>
+						</tt:call>
+				 </СумНалВсего>
+
+				 <tt:serialize>
+
+						<tt:cond check="not-initial(ref('ROOT.AMNTNET'))">
+							 <tt:switch-var>
+									<tt:cond-var check="UTD_CAT=''">
+										 <НеттоВс>
+												<tt:value ref="ROOT.AMNTNET"/>
+										 </НеттоВс>
+									</tt:cond-var>
+									<tt:cond-var>
+										 <КолНеттоВс>
+												<tt:value ref="ROOT.AMNTNET"/>
+										 </КолНеттоВс>
+									</tt:cond-var>
+							 </tt:switch-var>
+
+						</tt:cond>
+				 </tt:serialize>
+				 <tt:deserialize>
+						<tt:cond>
+							 <НеттоВс>
+									<tt:value ref="ROOT.AMNTNET"/>
+							 </НеттоВс>
+						</tt:cond>
+						<tt:cond>
+							 <КолНеттоВс>
+									<tt:value ref="ROOT.AMNTNET"/>
+							 </КолНеттоВс>
+						</tt:cond>
+				 </tt:deserialize>
+			</ВсегоОпл>
+	 </tt:template>
+
+</tt:transform>

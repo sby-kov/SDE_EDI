@@ -1,0 +1,165 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+
+	 <tt:root name="ROOT"/>
+	 <tt:variable name="TMP"/>
+	 <tt:variable name="DEF" val="C('-')" />
+
+	 <tt:template>
+			<tt:serialize>
+				 <tt:loop name="LINE" ref=".ROOT.SIGNER_TAB">
+						<Подписант>
+							 <tt:attribute name="ОблПолн" value-ref="$LINE.AUTH_AREA"/>
+							 <tt:assign ref="$LINE.AUTH_BASIS" to-var="TMP"/>
+							 <tt:cond check="initial(ref('$LINE.AUTH_BASIS'))">
+									<tt:assign to-var="TMP" val="C('Должностные обязанности')"/>
+							 </tt:cond>
+							 <tt:attribute name="ОснПолн">
+									<tt:write var="TMP"/>
+							 </tt:attribute>
+							 <tt:cond check="not-initial(ref('$LINE.AUTH_BASIS_ORG'))">
+									<tt:attribute name="ОснПолнОрг" value-ref="$LINE.AUTH_BASIS_ORG"/>
+							 </tt:cond>
+							 <tt:attribute name="Статус" value-ref="$LINE.STATUS"/>
+
+							 <tt:cond check="ref('$LINE.PERS_TYPE')='P'">
+									<ФЛ>
+										 <tt:cond check="not-initial(ref('$LINE.INF_PERSON.SVIDET'))">
+												<tt:attribute name="ГосРегИПВыдДов" value-ref="$LINE.INF_PERSON.SVIDET"/>
+										 </tt:cond>
+										 <tt:cond check="not-initial(ref('$LINE.INF_PERSON.INN'))">
+												<tt:attribute name="ИННФЛ" value-ref="$LINE.INF_PERSON.INN"/>
+										 </tt:cond>
+										 <tt:cond check="not-initial(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед" value-ref="$LINE.ADDITIONAL_DATA"/>
+										 </tt:cond>
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="$LINE.INF_PERSON"/>
+												</tt:call>
+										 </ФИО>
+									</ФЛ>
+							 </tt:cond>
+
+							 <tt:cond check="ref('$LINE.PERS_TYPE')='I'">
+									<ИП>
+										 <tt:cond check="not-initial(ref('$LINE.INF_IP.INN'))">
+												<tt:attribute name="ИННФЛ" value-ref="$LINE.INF_IP.INN"/>
+										 </tt:cond>
+										 <tt:cond check="initial(ref('$LINE.INF_IP.INN'))">
+												<tt:attribute name="ДефИННФЛ"> <tt:write var="DEF"/> </tt:attribute>
+										 </tt:cond>
+										 <tt:cond check="not-initial(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед" value-ref="$LINE.ADDITIONAL_DATA"/>
+										 </tt:cond>
+										 <tt:cond check="not-initial(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="СвГосРегИП" value-ref="$LINE.INF_IP.SVIDET"/>
+										 </tt:cond>
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="$LINE.INF_IP"/>
+												</tt:call>
+										 </ФИО>
+									</ИП>
+							 </tt:cond>
+
+							 <tt:cond check="not(ref('$LINE.PERS_TYPE')='P') and not(ref('$LINE.PERS_TYPE')='I')">
+									<ЮЛ>
+										 <tt:cond check="not-initial(ref('$LINE.INF_ORG.SVIDET'))">
+												<tt:attribute name="ГосРегИПВыдДов" value-ref="$LINE.INF_ORG.SVIDET"/>
+										 </tt:cond>
+										 <tt:attribute name="Должн" value-ref="$LINE.INF_ORG.JOBPOS"/>
+										 <tt:attribute name="ИННЮЛ" value-ref="$LINE.INF_ORG.INN"/>
+										 <tt:cond check="not-initial(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед" value-ref="$LINE.ADDITIONAL_DATA"/>
+										 </tt:cond>
+										 <tt:cond check="not-initial(ref('$LINE.ORG_NAME'))">
+												<tt:attribute name="НаимОрг" value-ref="$LINE.ORG_NAME"/>
+										 </tt:cond>
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="$LINE.INF_ORG"/>
+												</tt:call>
+										 </ФИО>
+									</ЮЛ>
+							 </tt:cond>
+						</Подписант>
+				 </tt:loop>
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:loop name="LINE" ref=".ROOT.SIGNER_TAB">
+						<Подписант>
+							 <tt:attribute name="ОблПолн" value-ref="$LINE.AUTH_AREA"/>
+							 <tt:attribute name="ОснПолн" value-ref="$LINE.AUTH_BASIS"/>
+							 <tt:cond check="exist(ref('$LINE.AUTH_BASIS_ORG'))">
+									<tt:attribute name="ОснПолнОрг" value-ref="$LINE.AUTH_BASIS_ORG"/>
+							 </tt:cond>
+							 <tt:attribute name="Статус" value-ref="$LINE.STATUS"/>
+
+							 <tt:cond>
+									<ФЛ>
+										 <tt:cond check="exist(ref('$LINE.INF_PERSON.SVIDET'))">
+												<tt:attribute name="ГосРегИПВыдДов" value-ref="$LINE.INF_PERSON.SVIDET"/>
+										 </tt:cond>
+										 <tt:cond check="exist(ref('$LINE.INF_PERSON.INN'))">
+												<tt:attribute name="ИННФЛ" value-ref="$LINE.INF_PERSON.INN"/>
+										 </tt:cond>
+										 <tt:cond check="exist(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед" value-ref="$LINE.ADDITIONAL_DATA"/>
+										 </tt:cond>
+										 <tt:assign to-ref="$LINE.PERS_TYPE" val="'P'"/>
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="$LINE.INF_PERSON"/>
+												</tt:call>
+										 </ФИО>
+									</ФЛ>
+							 </tt:cond>
+
+							 <tt:cond>
+									<ИП>
+										 <tt:cond check="exist(ref('$LINE.INF_IP.INN'))">
+												<tt:attribute name="ИННФЛ" value-ref="$LINE.INF_IP.INN"/>
+										 </tt:cond>
+										 <tt:cond check="exist(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед" value-ref="$LINE.ADDITIONAL_DATA"/>
+										 </tt:cond>
+										 <tt:cond check="exist(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="СвГосРегИП" value-ref="$LINE.INF_IP.SVIDET"/>
+										 </tt:cond>
+										 <tt:assign to-ref="$LINE.PERS_TYPE" val="'I'"/>
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="$LINE.INF_IP"/>
+												</tt:call>
+										 </ФИО>
+									</ИП>
+							 </tt:cond>
+
+							 <tt:cond>
+									<ЮЛ>
+										 <tt:cond check="exist(ref('$LINE.INF_ORG.SVIDET'))">
+												<tt:attribute name="ГосРегИПВыдДов" value-ref="$LINE.INF_ORG.SVIDET"/>
+										 </tt:cond>
+										 <tt:attribute name="Должн" value-ref="$LINE.INF_ORG.JOBPOS"/>
+										 <tt:attribute name="ИННЮЛ" value-ref="$LINE.INF_ORG.INN"/>
+										 <tt:cond check="exist(ref('$LINE.ADDITIONAL_DATA'))">
+												<tt:attribute name="ИныеСвед" value-ref="$LINE.ADDITIONAL_DATA"/>
+										 </tt:cond>
+										 <tt:cond check="exist(ref('$LINE.ORG_NAME'))">
+												<tt:attribute name="НаимОрг" value-ref="$LINE.ORG_NAME"/>
+										 </tt:cond>
+										 <ФИО>
+												<tt:call transformation="J_3RF_SUBTR_FIO">
+													 <tt:with-root name="ROOT" ref="$LINE.INF_ORG"/>
+												</tt:call>
+										 </ФИО>
+									</ЮЛ>
+							 </tt:cond>
+						</Подписант>
+				 </tt:loop>
+			</tt:deserialize>
+	 </tt:template>
+
+</tt:transform>

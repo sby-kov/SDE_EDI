@@ -1,0 +1,103 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates" xmlns:ddic="http://www.sap.com/abapxml/types/dictionary" xmlns:def="http://www.sap.com/abapxml/types/defined">
+
+	 <tt:root name="ROOT" type="ddic:J_3RF_DIXML_SCHFDOPPR"/>
+	 <tt:variable name="DATE"/>
+	 <tt:variable name="TMP"/>
+	 <tt:variable name="DEF" val="C('-')"/>
+	 <tt:variable name="REVNO" type="I"/>
+	 <tt:template>
+
+			<tt:serialize>
+				 <tt:assign ref="ROOT.EXT_ORIG" to-var="TMP"/>
+				 <tt:cond check="initial(ref('ROOT.EXT_ORIG'))">
+						<tt:assign to-var="TMP" val="C('б/н')"/>
+				 </tt:cond>
+				 <tt:attribute name="НомерСчФ">
+						<tt:write var="TMP"/>
+				 </tt:attribute>
+			</tt:serialize>
+
+			<tt:deserialize>
+				 <tt:attribute name="НомерСчФ">
+						<tt:value ref="ROOT.EXT_ORIG"/>
+				 </tt:attribute>
+			</tt:deserialize>
+
+			<tt:serialize>
+				 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+						<tt:with-parameter ref="ROOT.DATE_ORIG" s-name="DATE_IF"/>
+						<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+				 </tt:call-method>
+				 <tt:attribute name="ДатаСчФ">
+						<tt:write var="DATE"/>
+				 </tt:attribute>
+			</tt:serialize>
+			<tt:deserialize>
+				 <tt:attribute name="ДатаСчФ">
+						<tt:read var="DATE"/>
+				 </tt:attribute>
+				 <tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+						<tt:with-parameter d-name="DATE_EF" var="DATE"/>
+						<tt:with-parameter d-name="DATE_IF" ref="ROOT.DATE_ORIG"/>
+				 </tt:call-method>
+			</tt:deserialize>
+
+			<tt:attribute name="КодОКВ">
+				 <tt:value ref="ROOT.CURRCODE"/>
+			</tt:attribute>
+
+			<!-- СвСчФакт/ИспрСчФ -->
+			<tt:serialize>
+				 <tt:cond check="not-initial(ref('ROOT.REVNO_ORIG')) or not-initial(ref('ROOT.DATE_REV_ORIG'))">
+						<ИспрСчФ>
+							 <tt:assign ref="ROOT.REVNO_ORIG" to-var="REVNO"/>
+							 <tt:attribute name="НомИспрСчФ">
+									<tt:write var="REVNO"/>
+							 </tt:attribute>
+							 <tt:call-method class="J_3RF_TRANSF_01" s-name="IDATE_TO_EDATE">
+									<tt:with-parameter ref="ROOT.DATE_REV_ORIG" s-name="DATE_IF"/>
+									<tt:with-parameter s-name="DATE_EF" var="DATE"/>
+							 </tt:call-method>
+							 <tt:attribute name="ДатаИспрСчФ">
+									<tt:write var="DATE"/>
+							 </tt:attribute>
+						</ИспрСчФ>
+				 </tt:cond>
+				 <tt:cond check="initial(ref('ROOT.REVNO_ORIG')) and initial(ref('ROOT.DATE_REV_ORIG')) and ref('ROOT.SRC_TYPE') &gt;= N('10') and ref('ROOT.SRC_TYPE') &lt;= N('18')">
+						<ИспрСчФ>
+							 <tt:attribute name="ДефНомИспрСчФ"> <tt:write var="DEF"/> </tt:attribute>
+							 <tt:attribute name="ДефДатаИспрСчФ"> <tt:write var="DEF"/> </tt:attribute>
+						</ИспрСчФ>
+				 </tt:cond>
+			</tt:serialize>
+			<tt:deserialize>
+				 <tt:cond>
+						<ИспрСчФ>
+							 <tt:cond d-check="exist(ref('ROOT.REVNO_ORIG'))">
+									<tt:attribute name="НомИспрСчФ" value-ref=".ROOT.REVNO_ORIG"/>
+							 </tt:cond>
+							 <!--          <tt:attribute name="НомИспрСчФ">
+								 <tt:value ref="ROOT.REVNO_ORIG"/>
+							 </tt:attribute>-->
+							 <tt:cond d-check="exist(ref('ROOT.DATE_REV_ORIG'))">
+									<tt:attribute name="ДатаИспрСчФ">
+										 <tt:read var="DATE"/>
+									</tt:attribute>
+									<tt:call-method class="J_3RF_TRANSF_01" d-name="EDATE_TO_IDATE">
+										 <tt:with-parameter d-name="DATE_EF" var="DATE"/>
+										 <tt:with-parameter d-name="DATE_IF" ref="ROOT.DATE_REV_ORIG"/>
+									</tt:call-method>
+							 </tt:cond>
+						</ИспрСчФ>
+				 </tt:cond>
+			</tt:deserialize>
+
+			<!-- СвСчФакт/СвПрод -->
+			<СвПрод>
+				 <tt:call transformation="J_3RF_SUBTR_PARTNER_02">
+						<tt:with-root name="ROOT" ref="ROOT.SELLER"/>
+				 </tt:call>
+			</СвПрод>
+	 </tt:template>
+</tt:transform>

@@ -1162,7 +1162,7 @@
         </tt:deserialize>
 
         <!-- Файл/Документ/СвПродПер -->
-        <tt:call transformation="J_3RF_SUBTR_UTD_SHIPMENT">
+        <tt:call transformation="ZJ_3RF_SUBTR_UTD_SHIPMENT">
           <tt:with-root name="ROOT" ref="ROOT"/>
         </tt:call>
 
