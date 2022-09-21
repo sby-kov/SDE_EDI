@@ -121,15 +121,16 @@
           </tt:cond>
         </tt:cond>
 
-        <tt:call transformation="J_3RF_SUBTR_UTD_DOC_NAME">
+        <tt:call transformation="ZJ_3RF_SUBTR_UTD_DOC_NAME">
           <tt:with-root name="ROOT" ref="ROOT"/>
         </tt:call>
 
-        <tt:call transformation="J_3RF_SUBTR_UTD_FUNCTION">
+        <tt:call transformation="ZJ_3RF_SUBTR_UTD_FUNCTION">
           <tt:with-root name="ROOT" ref="ROOT"/>
           <tt:with-parameter name="FUNCTION_PR" val="''"/>
           <tt:with-parameter name="UTD_CAT" var="UTD_CAT"/>
         </tt:call>
+
         <!-- Файл/Документ/СвСчФакт -->
         <СвСчФакт>
           <tt:call transformation="J_3RF_SUBTR_SVSCHFAKT_02">
@@ -594,7 +595,7 @@
                   <tt:switch-var>
                     <tt:cond-var check="UTD_CAT=''">
                       <tt:loop name="NOTES_TAB" ref="$ITEM.NOTES_TAB">
-                        <!-- закрываем ЕСапунов
+                        <!-- БСВ: закрываем ЕСапунов
                         <ИнфПолФХЖ2>
                           <tt:attribute name="Значен">
                             <tt:value ref="$NOTES_TAB.NOTE_TEXT"/>
@@ -603,11 +604,11 @@
                             <tt:value ref="$NOTES_TAB.NOTE_ID"/>
                           </tt:attribute>
                         </ИнфПолФХЖ2>
-                        закрываем ЕСапунов -->
+                      закрываем ЕСапунов -->
                       </tt:loop>
-
-                      <tt:cond check=
-                                       "not-initial(ref('$ITEM.GOOD_TYPE')) or
+                      <!-- БСВ:  добавил для $ITEM.OKEI (611) по ошибке d.  004-ZUT1 -->
+                      <tt:cond check= "not-initial(ref('$ITEM.GOOD_TYPE')) or
+                       not-initial(ref('$ITEM.OKEI')) or
                        not-initial(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
                        not-initial(ref('$ITEM.GOOD_FEATURE')) or
                        not-initial(ref('$ITEM.MEASURE_NAME')) or
@@ -700,7 +701,7 @@
                     </tt:cond-var>
                     <tt:cond-var>
                       <tt:cond check=
-                                       "not-initial(ref('$ITEM.GOOD_TYPE')) or
+                                     "not-initial(ref('$ITEM.GOOD_TYPE')) or
                        not-initial(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
                        not-initial(ref('$ITEM.GOOD_FEATURE')) or
                        not-initial(ref('$ITEM.MEASURE_NAME')) or
@@ -793,26 +794,26 @@
 
                           <!--                       Файл/Документ/ТаблСчФакт/ДопСведТов/НомСредИдентТов -->
                           <!--                          <tt:cond check="not-initial(ref('$ITEM.GOODS_IDENTITY'))">
-                                                      <НомСредИдентТов>
-                                                        <tt:loop name="GOODS" ref="$ITEM.GOODS_IDENTITY">
-                                                          <tt:cond s-check="not-initial(ref('$GOODS.PACKAGE_ID'))">
-                                                            <tt:attribute name="ИдентТрансУпак" value-ref="$GOODS.PACKAGE_ID"/>
-                                                          </tt:cond>
-                                                          <tt:cond s-check="not-initial(ref('$GOODS.CONTROL_ID_MARK'))">
-                                                            <tt:assign ref="$GOODS.CONTROL_ID_MARK" to-var="TMP"/>
-                                                            <КИЗ>
-                                                              <tt:write var="TMP"/>
-                                                            </КИЗ>
-                                                          </tt:cond>
-                                                          <tt:cond s-check="not-initial(ref('$GOODS.SEC_PACKAGE_ID'))">
-                                                            <tt:assign ref="$GOODS.SEC_PACKAGE_ID" to-var="TMP"/>
-                                                            <НомУпак>
-                                                              <tt:write var="TMP"/>
-                                                            </НомУпак>
-                                                          </tt:cond>
-                                                        </tt:loop>
-                                                      </НомСредИдентТов>
-                                                    </tt:cond>-->
+																											<НомСредИдентТов>
+																												<tt:loop name="GOODS" ref="$ITEM.GOODS_IDENTITY">
+																													<tt:cond s-check="not-initial(ref('$GOODS.PACKAGE_ID'))">
+																														<tt:attribute name="ИдентТрансУпак" value-ref="$GOODS.PACKAGE_ID"/>
+																													</tt:cond>
+																													<tt:cond s-check="not-initial(ref('$GOODS.CONTROL_ID_MARK'))">
+																														<tt:assign ref="$GOODS.CONTROL_ID_MARK" to-var="TMP"/>
+																														<КИЗ>
+																															<tt:write var="TMP"/>
+																														</КИЗ>
+																													</tt:cond>
+																													<tt:cond s-check="not-initial(ref('$GOODS.SEC_PACKAGE_ID'))">
+																														<tt:assign ref="$GOODS.SEC_PACKAGE_ID" to-var="TMP"/>
+																														<НомУпак>
+																															<tt:write var="TMP"/>
+																														</НомУпак>
+																													</tt:cond>
+																												</tt:loop>
+																											</НомСредИдентТов>
+																										</tt:cond>-->
 
                           <tt:cond check="not-initial(ref('$ITEM.GOODS_IDENTITY_NEW'))">
                             <tt:loop name="GOODS" ref="$ITEM.GOODS_IDENTITY_NEW">
@@ -946,7 +947,7 @@
                       </tt:loop>
 
                       <tt:cond check=
-                                       "exist(ref('$ITEM.GOOD_TYPE')) or
+                                     "exist(ref('$ITEM.GOOD_TYPE')) or
                        exist(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
                        exist(ref('$ITEM.GOOD_FEATURE')) or
                        exist(ref('$ITEM.MEASURE_NAME')) or
@@ -1017,7 +1018,7 @@
                     </tt:cond-var>
                     <tt:cond-var>
                       <tt:cond check=
-                                       "exist(ref('$ITEM.GOOD_TYPE')) or
+                                     "exist(ref('$ITEM.GOOD_TYPE')) or
                        exist(ref('$ITEM.GOOD_TYPE_ADD_INF')) or
                        exist(ref('$ITEM.GOOD_FEATURE')) or
                        exist(ref('$ITEM.MEASURE_NAME')) or
@@ -1161,7 +1162,7 @@
           </tt:cond>
         </tt:deserialize>
 
-        <!-- Файл/Документ/СвПродПер -->
+        <!-- Файл/Документ/СвПродПер БСВ: замена для НаимОсн = Без документа-основания -->
         <tt:call transformation="ZJ_3RF_SUBTR_UTD_SHIPMENT">
           <tt:with-root name="ROOT" ref="ROOT"/>
         </tt:call>
