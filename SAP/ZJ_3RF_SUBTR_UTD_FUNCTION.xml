@@ -5,8 +5,8 @@
 	 <tt:variable name="TMP"/>
 	 <tt:parameter kind="in" name="FUNCTION_PR"/>
 	 <tt:parameter kind="in" name="UTD_CAT"/>
-	 <!-- БСВ: пар-р для передачи Функции -->
-	 <tt:parameter kind="in" name="FUNC"/>
+	 <!-- БСВ: пар-р для возврата Функции -->
+	 <tt:parameter kind="out" name="FUNC"/>
 
 	 <tt:template>
 			<tt:serialize>
@@ -34,7 +34,7 @@
 							 <tt:write var="TMP"/>
 						</tt:attribute>
 				 </tt:cond-var>
-				 <tt:assign to-var="FUNC" var="TMP"/>		<!-- БСВ: сохраняем для обработки вне -->
+				 <tt:assign to-var="FUNC" var="TMP"/>    <!-- БСВ: сохраняем для обработки вне -->
 				 <tt:cond-var check="FUNCTION_PR='X'">
 						<tt:attribute name="ФункцияПр">
 							 <tt:write var="TMP"/>

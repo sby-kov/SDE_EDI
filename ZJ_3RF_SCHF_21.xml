@@ -8,6 +8,7 @@
   <tt:variable name="UTD_CAT"/>
   <tt:variable name="DEF" val="C('-')" />
   <tt:variable name="GOODS_ID"/>
+  <tt:variable name="FUNC"/>
   <tt:template>
     <!-- Файл -->
     <Файл>
@@ -129,6 +130,7 @@
           <tt:with-root name="ROOT" ref="ROOT"/>
           <tt:with-parameter name="FUNCTION_PR" val="''"/>
           <tt:with-parameter name="UTD_CAT" var="UTD_CAT"/>
+          <tt:with-parameter name="FUNC" var="FUNC"/>
         </tt:call>
 
         <!-- Файл/Документ/СвСчФакт -->

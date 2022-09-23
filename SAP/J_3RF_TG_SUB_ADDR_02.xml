@@ -1,0 +1,60 @@
+<?sap.transform simple?>
+<tt:transform xmlns:tt="http://www.sap.com/transformation-templates">
+	 <tt:root name="ROOT"/>
+	 <tt:template name = "ADDR">
+			<tt:cond>
+				 <Адрес>
+						<tt:cond s-check="not-initial(ref('ROOT.POSTCODE')) or not-initial(ref('ROOT.REGION'))
+          or not-initial(ref('ROOT.CITY1')) or not-initial(ref('ROOT.CITY2'))
+          or not-initial(ref('ROOT.CITY3')) or not-initial(ref('ROOT.STREET'))
+          or not-initial(ref('ROOT.HOUSE_NUM1')) or not-initial(ref('ROOT.HOUSE_NUM2'))
+          or not-initial(ref('ROOT.LOCATION'))" >
+							 <АдрРФ>
+									<tt:cond s-check="not-initial(ref('ROOT.POSTCODE'))">
+										 <tt:attribute name="Индекс">     <tt:value ref="ROOT.POSTCODE"/>   </tt:attribute>
+									</tt:cond>
+									<tt:attribute name="КодРегион">  <tt:value ref="ROOT.REGION"/>     </tt:attribute>
+									<tt:cond s-check="not-initial(ref('ROOT.CITY2'))">
+										 <tt:attribute name="Район">      <tt:value ref="ROOT.CITY2"/>      </tt:attribute>
+									</tt:cond>
+									<tt:cond s-check="not-initial(ref('ROOT.CITY1'))">
+										 <tt:attribute name="Город">      <tt:value ref="ROOT.CITY1"/>      </tt:attribute>
+									</tt:cond>
+									<tt:cond s-check="not-initial(ref('ROOT.CITY3'))">
+										 <tt:attribute name="НаселПункт"> <tt:value ref="ROOT.CITY3"/>      </tt:attribute>
+									</tt:cond>
+									<tt:cond s-check="not-initial(ref('ROOT.STREET'))">
+										 <tt:attribute name="Улица">      <tt:value ref="ROOT.STREET"/>     </tt:attribute>
+									</tt:cond>
+									<tt:cond s-check="not-initial(ref('ROOT.HOUSE_NUM1'))">
+										 <tt:attribute name="Дом">        <tt:value ref="ROOT.HOUSE_NUM1"/> </tt:attribute>
+									</tt:cond>
+									<tt:cond s-check="not-initial(ref('ROOT.HOUSE_NUM2'))">
+										 <tt:attribute name="Корпус">     <tt:value ref="ROOT.HOUSE_NUM2"/> </tt:attribute>
+									</tt:cond>
+									<tt:cond s-check="not-initial(ref('ROOT.LOCATION'))">
+										 <tt:attribute name="Кварт">      <tt:value ref="ROOT.LOCATION"/>   </tt:attribute>
+									</tt:cond>
+							 </АдрРФ>
+						</tt:cond>
+
+						<tt:cond s-check="not-initial(ref('ROOT.FULL_ADDRESS'))">
+							 <АдрИнф>
+									<tt:attribute name="КодСтр">   <tt:value ref="ROOT.COUNTRY"/>      </tt:attribute>
+									<tt:attribute name="АдрТекст"> <tt:value ref="ROOT.FULL_ADDRESS"/> </tt:attribute>
+							 </АдрИнф>
+						</tt:cond>
+
+						<tt:cond s-check="not-initial(ref('ROOT.ADDR_CODE'))">
+							 <tt:cond>
+									<КодГАР>
+										 <tt:value ref="ROOT.ADDR_CODE"/>
+									</КодГАР>
+							 </tt:cond>
+						</tt:cond>
+
+				 </Адрес>
+			</tt:cond>
+
+	 </tt:template>
+</tt:transform>
