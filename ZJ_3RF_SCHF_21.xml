@@ -638,6 +638,10 @@
 
                           <tt:cond s-check="not-initial(ref('$ITEM.MEASURE_NAME'))">
                             <tt:attribute name="НаимЕдИзм" value-ref="$ITEM.MEASURE_NAME"/>
+
+                          </tt:cond>
+                          <tt:cond s-check="initial(ref('$ITEM.MEASURE_NAME'))">
+                            <tt:attribute name="НаимЕдИзм"> <tt:write var="DEF"/> </tt:attribute> <!-- пусто='-' -->
                           </tt:cond>
 
                           <tt:cond s-check="not-initial(ref('$ITEM.COUNTRY_ORIGIN'))">
